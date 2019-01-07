@@ -20,13 +20,9 @@ export default class AppWindow extends window.HTMLElement {
       <style>
         :host {
           display: block;
+          position: absolute;
           margin: 0;
           padding: 0;
-          width: auto;
-          min-width: 200px;
-          max-width: 600px;
-          max-width: 25%;
-          height: auto;
           border: 1px solid #d3d3d3;
           box-shadow: 0px 0px 25px rgba( 20, 20, 20, 0.15 );
         }
@@ -53,6 +49,10 @@ export default class AppWindow extends window.HTMLElement {
     this.y = 0
     this.focus = false
 
+    // set windows dimensions
+    this.width = 300
+    this.height = 160 // TODO: auto-calc height
+
     // attatch shadow DOM & append template
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
@@ -64,6 +64,10 @@ export default class AppWindow extends window.HTMLElement {
     // set initial text content for elements
     this._titleElem.textContent = 'Title goes here'
     this._contentElem.textContent = 'Content goes here'
+
+    // set initial window dimensions
+    this.style.width = this.width + 'px'
+    this.style.height = this.height + 'px'
   }
 
   connectedCallback () {
