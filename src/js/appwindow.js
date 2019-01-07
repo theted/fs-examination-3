@@ -83,7 +83,7 @@ export default class AppWindow extends window.HTMLElement {
   }
 
   static get observedAttributes () {
-    return ['title', 'content']
+    return ['title', 'content', 'x', 'y']
   }
 
   attributeChangedCallback (name, oldValue, newValue) {
@@ -92,6 +92,8 @@ export default class AppWindow extends window.HTMLElement {
     switch (name) {
       case 'title': this._titleElem.textContent = newValue; break
       case 'content': this._contentElem.textContent = newValue; break
+      case 'x': this.style.left = newValue + 'px'; break
+      case 'y': this.style.top = newValue + 'px'; break
     }
   }
 }
