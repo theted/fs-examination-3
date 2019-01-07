@@ -1,5 +1,13 @@
 /**
  * Window manager module
+ *
+ * TODO: handle initial values for title & content
+ * TODO: add support for any type of main content
+ * TODO: add support for resizing windows
+ * TODO: place new windows at center of screen
+ * TODO: add support for moving windows
+ * TODO: add support for focus / handle z-index as correctly
+ * TODO: add support for closing windows
  */
 export default class AppWindow extends window.HTMLElement {
   constructor () {
