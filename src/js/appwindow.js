@@ -68,6 +68,12 @@ export default class AppWindow extends window.HTMLElement {
     // set initial window dimensions
     this.style.width = this.width + 'px'
     this.style.height = this.height + 'px'
+
+    // place window at center of screen
+    this.x = (window.innerWidth / 2) - (this.width / 2)
+    this.y = (window.innerHeight / 2) - (this.height / 2)
+    this.style.left = this.x + 'px'
+    this.style.top = this.y + 'px'
   }
 
   connectedCallback () {
