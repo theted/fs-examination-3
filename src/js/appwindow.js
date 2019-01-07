@@ -1,10 +1,8 @@
 /**
  * Window manager module
  *
- * TODO: handle initial values for title & content
  * TODO: add support for any type of main content
  * TODO: add support for resizing windows
- * TODO: place new windows at center of screen
  * TODO: add support for moving windows
  * TODO: add support for focus / handle z-index as correctly
  * TODO: add support for closing windows
@@ -82,6 +80,19 @@ export default class AppWindow extends window.HTMLElement {
 
   disconnectedCallback () {
     console.log('Destroying window')
+  }
+
+  static get observedAttributes () {
+    return ['title', 'content']
+  }
+
+  attributeChangedCallback (name, oldValue, newValue) {
+    console.log(`change ${name} from ${oldValue} to ${newValue}`)
+
+    switch (name) {
+      case 'title': this._titleElem.textContent = newValue; break
+      case 'content': this._contentElem.textContent = newValue; break
+    }
   }
 }
 
