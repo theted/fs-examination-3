@@ -32,6 +32,15 @@ export default class AppWindow extends window.HTMLElement {
           padding: .6em;
         }
 
+        :host .close {
+          position: absolute;
+          right: 0px;
+          top: 0px;
+          color: white;
+          padding: 9px 14px;
+          background: #333;
+        }
+
         :host .content {
           background: #f9f9f9;
           padding: 1.2em;
@@ -39,6 +48,7 @@ export default class AppWindow extends window.HTMLElement {
       </style>
 
       <div class="title"></div>
+      <div class="close">X</div>
       <div class="content"></div>
     `
 
@@ -72,6 +82,12 @@ export default class AppWindow extends window.HTMLElement {
     this.y = (window.innerHeight / 2) - (this.height / 2)
     this.style.left = this.x + 'px'
     this.style.top = this.y + 'px'
+
+    this.addEventListener('click', this._focus)
+  }
+
+  _focus () {
+    console.log('Should focus window!', this)
   }
 
   connectedCallback () {
