@@ -30,6 +30,7 @@ export default class AppWindow extends window.HTMLElement {
 
     // setup sub-elements
     this._contentElem = this.shadowRoot.querySelector('.content')
+    this._navbarElem = this.shadowRoot.querySelector('.navbar')
     this._titleElem = this.shadowRoot.querySelector('.title')
     this._closeElem = this.shadowRoot.querySelector('.close')
     this._moveElem = this.shadowRoot.querySelector('.move')
@@ -46,8 +47,9 @@ export default class AppWindow extends window.HTMLElement {
 
     // bind event listeners
     this.addEventListener('click', this._focus)
+    this.addEventListener('focusout', this._blur)
+
     this._closeElem.addEventListener('click', () => this.destroy())
-    // this.onmousedown = this.dragStart // setup initial mousedown event
   }
 
   /**
@@ -71,7 +73,13 @@ export default class AppWindow extends window.HTMLElement {
   }
 
   _focus () {
-    console.log('Should focus window!', this)
+    console.log('Focus window')
+    this.style.zIndex = 2
+  }
+
+  _blur () {
+    console.log('Blur window')
+    this.style.zIndex = 1
   }
 
   connectedCallback () {
