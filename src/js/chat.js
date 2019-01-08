@@ -3,7 +3,9 @@
  * TODO: persist (some!) latest messages in localStorage
  */
 import AppWindow from './appwindow.js'
+import Storage from './storage.js'
 import Config from './config.js'
+const storage = new Storage()
 
 export default class ChatApp extends AppWindow {
   constructor () {
@@ -33,7 +35,11 @@ export default class ChatApp extends AppWindow {
 
     this._contentElem.appendChild(template.content.cloneNode(true))
 
+    // set defaults
     this.username = 'Dude'
+    storage.remove('messages')
+    this.messages = storage.get('messages') || []
+    if (this.messages.length) this.messages = JSON.parse(this.messages)
 
     // setup elems
     this._titleElem = this.shadowRoot.querySelector('.title')
@@ -41,6 +47,20 @@ export default class ChatApp extends AppWindow {
     this._messageElem = this.shadowRoot.querySelector('input')
     this._sendButton = this.shadowRoot.querySelector('button')
     this.setTitle('Live chat')
+
+    // populate messages if existing
+    if (this.messages && this.messages.length) {
+      console.log('messages ->')
+      console.log((this.messages))
+
+      for (let i = 0; i < this.messages.length; ++i) {
+        let message = this.messages[i]
+        console.log(message)
+        this.addMessage(message.text, message.user, message.time)
+      }
+    } else {
+      console.log('No previous messages...')
+    }
 
     // bind click & enter to submit vents
     this._sendButton.addEventListener('click', () => {
@@ -80,21 +100,21 @@ export default class ChatApp extends AppWindow {
    * @param {string} message
    * @param {string} user
    */
-  addMessage (message, user) {
-    console.log('Adding messadg...')
-
-    // get date string
-    let dt = new Date()
-    let timeStamp = dt.toLocaleTimeString('sv-SE')
+  addMessage (message, user, time) {
+    if (!time || typeof time === undefined) {
+      let dt = new Date()
+      time = dt.toLocaleTimeString('sv-SE')
+    }
 
     // crate html elements for the message
     let msg = document.createElement('p')
     let msgTime = msg.appendChild(document.createElement('span'))
     let msgUser = msg.appendChild(document.createElement('span'))
     let msgMsg = msg.appendChild(document.createElement('span'))
+    // let msgTime = _.addTo(msg, 'span', time, 'time') // using helper function
 
     // set content
-    msgTime.textContent = timeStamp
+    msgTime.textContent = time
     msgUser.textContent = user
     msgMsg.textContent = message
 
@@ -106,6 +126,17 @@ export default class ChatApp extends AppWindow {
 
     // append the prepared messages element to the chat messages box
     this._messages.appendChild(msg)
+
+    // save current list of messages in localStorage
+    let messageData = {
+      time: time,
+      user: user,
+      text: message
+    }
+
+    this.messages.push(messageData)
+    // console.log(this.messages)
+    storage.set('messages', JSON.stringify(this.messages))
   }
 
   /**
