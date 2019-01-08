@@ -6,35 +6,17 @@ import AppWindow from './appwindow.js'
 import Storage from './storage.js'
 import Config from './config.js'
 import * as _ from './helpers.js'
+import cssTemplate from './chat.css.js'
+import htmlTemplate from './chat.html.js'
 const storage = new Storage()
 
 export default class ChatApp extends AppWindow {
   constructor () {
     super()
 
-    // add additional content
-    const template = document.createElement('template')
-    template.innerHTML = /* html */ `
-      <style>
-        :host .message {
-          background: #eee;
-          border-bottom: #d0d0d0;
-          padding: 3px;
-        }
-        :host .message .user {
-          font-weight: bold;
-        }
-        :host .message .time {
-          font-weight: 300;
-        }
-      </style>
-
-      <div class="chat-messages"></div>
-      <input type="text" name="message" id="message" placeholder="Message">
-      <button class="submit">Send</button>
-    `
-
-    this._contentElem.appendChild(template.content.cloneNode(true))
+    // extend content for AppWindow using external template
+    this._contentElem.appendChild(htmlTemplate.content.cloneNode(true))
+    this._contentElem.appendChild(cssTemplate.content.cloneNode(true))
 
     // set defaults
     this.username = 'Dude'
@@ -85,6 +67,8 @@ export default class ChatApp extends AppWindow {
    * @param {string} username
    */
   sendMessage (message, username) {
+    if (!message.length) return false
+
     this.connection.send(JSON.stringify({
       type: 'message',
       'data': message,
@@ -138,7 +122,7 @@ export default class ChatApp extends AppWindow {
      */
     this.connection.onmessage = function (e) {
       let res = JSON.parse(e.data)
-      console.log('Msg: ', res)
+      console.log('Server says -> : ', res)
       if (res.type === 'message') { _this.addMessage(res.data, res.username) }
     }
 
