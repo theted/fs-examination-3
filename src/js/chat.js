@@ -5,6 +5,7 @@
 import AppWindow from './appwindow.js'
 import Storage from './storage.js'
 import Config from './config.js'
+import * as _ from './helpers.js'
 const storage = new Storage()
 
 export default class ChatApp extends AppWindow {
@@ -101,41 +102,20 @@ export default class ChatApp extends AppWindow {
    * @param {string} user
    */
   addMessage (message, user, time) {
-    if (!time || typeof time === undefined) {
-      let dt = new Date()
-      time = dt.toLocaleTimeString('sv-SE')
-    }
+    if (!time || typeof time === undefined) { time = _.timeStamp() }
 
     // crate html elements for the message
-    let msg = document.createElement('p')
-    let msgTime = msg.appendChild(document.createElement('span'))
-    let msgUser = msg.appendChild(document.createElement('span'))
-    let msgMsg = msg.appendChild(document.createElement('span'))
-    // let msgTime = _.addTo(msg, 'span', time, 'time') // using helper function
-
-    // set content
-    msgTime.textContent = time
-    msgUser.textContent = user
-    msgMsg.textContent = message
-
-    // set correct classs for corresponding elements
-    msg.classList.add('message')
-    msgTime.classList.add('time')
-    msgUser.classList.add('user')
-    msgMsg.classList.add('text')
-
-    // append the prepared messages element to the chat messages box
-    this._messages.appendChild(msg)
+    let msg = _.addTo(this._messages, 'p', false, 'message')
+    let msgUser = _.addTo(msg, 'span', user, 'user')
+    let msgMsg = _.addTo(msg, 'span', message, 'text')
+    let msgTime = _.addTo(msg, 'span', time, 'time')
 
     // save current list of messages in localStorage
-    let messageData = {
+    this.messages.push({
       time: time,
       user: user,
       text: message
-    }
-
-    this.messages.push(messageData)
-    // console.log(this.messages)
+    })
     storage.set('messages', JSON.stringify(this.messages))
   }
 
