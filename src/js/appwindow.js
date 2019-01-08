@@ -7,50 +7,12 @@
  * TODO: add support for focus / handle z-index as correctly
  * TODO: add support for closing windows
  */
+import cssTemplate from './appwindow.css.js'
+import htmlTemplate from './appwindow.html.js'
+
 export default class AppWindow extends window.HTMLElement {
   constructor () {
     super()
-
-    // define element template
-    // TODO: split to external HTML / CSS files
-    const template = document.createElement('template')
-    template.innerHTML = /* html */`
-      <style>
-        :host {
-          display: block;
-          position: absolute;
-          margin: 0;
-          padding: 0;
-          border: 1px solid #d3d3d3;
-          box-shadow: 0px 0px 25px rgba( 20, 20, 20, 0.15 );
-        }
-
-        :host .title {
-          background: #212121;
-          border-bottom: 1px solid #d3d3d3;
-          color: #eee;
-          padding: .6em;
-        }
-
-        :host .close {
-          position: absolute;
-          right: 0px;
-          top: 0px;
-          color: white;
-          padding: 9px 14px;
-          background: #333;
-        }
-
-        :host .content {
-          background: #f9f9f9;
-          padding: 1.2em;
-        }
-      </style>
-
-      <div class="title"></div>
-      <div class="close">X</div>
-      <div class="content"></div>
-    `
 
     // setup default properties
     this.x = 0
@@ -63,15 +25,14 @@ export default class AppWindow extends window.HTMLElement {
 
     // attatch shadow DOM & append template
     this.attachShadow({ mode: 'open' })
-    this.shadowRoot.appendChild(template.content.cloneNode(true))
+    this.shadowRoot.appendChild(htmlTemplate.content.cloneNode(true))
+    this.shadowRoot.appendChild(cssTemplate.content.cloneNode(true))
 
     // setup sub-elements
-    this._titleElem = this.shadowRoot.querySelector('.title')
     this._contentElem = this.shadowRoot.querySelector('.content')
-
-    // set initial text content for elements
-    this._titleElem.textContent = 'Title goes here'
-    this._contentElem.textContent = 'Content goes here'
+    this._titleElem = this.shadowRoot.querySelector('.title')
+    this._closeElem = this.shadowRoot.querySelector('.close')
+    this._moveElem = this.shadowRoot.querySelector('.move')
 
     // set initial window dimensions
     this.style.width = this.width + 'px'
@@ -83,7 +44,30 @@ export default class AppWindow extends window.HTMLElement {
     this.style.left = this.x + 'px'
     this.style.top = this.y + 'px'
 
+    // bind event listeners
     this.addEventListener('click', this._focus)
+    this._closeElem.addEventListener('click', () => this.destroy())
+    // this.onmousedown = this.dragStart // setup initial mousedown event
+  }
+
+  /**
+   * Set the title of the window
+   * @param {string} Window title
+   */
+  setTitle (title) {
+    this._titleElem.textContent = title
+  }
+
+  /**
+   * Set (HTML) content
+   * @param {strinf} HTML content
+   */
+  setContent (content) {
+    this._contentElem.innerHTML = content
+  }
+
+  destroy () {
+    this.remove()
   }
 
   _focus () {
@@ -103,10 +87,10 @@ export default class AppWindow extends window.HTMLElement {
   }
 
   attributeChangedCallback (name, oldValue, newValue) {
-    console.log(`change ${name} from ${oldValue} to ${newValue}`)
+    console.log(`Change "${name}" from "${oldValue}" to "${newValue}"`)
 
     switch (name) {
-      case 'title': this._titleElem.textContent = newValue; break
+      case 'title': this.setTitle(newValue); break
       case 'content': this._contentElem.textContent = newValue; break
       case 'x': this.style.left = newValue + 'px'; break
       case 'y': this.style.top = newValue + 'px'; break
