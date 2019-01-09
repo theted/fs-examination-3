@@ -84,6 +84,7 @@ export default class ChatApp extends AppWindow {
     let msgUser = _.addTo(msg, 'span', user, 'user')
     let msgMsg = _.addTo(msg, 'span', message, 'text')
     let msgTime = _.addTo(msg, 'span', time, 'time')
+    this._messages.scrollTop = this._messages.scrollHeight // scroll to bottom of chat window
     return msg
   }
 
@@ -121,7 +122,6 @@ export default class ChatApp extends AppWindow {
 
     this.connection.onopen = function () {
       console.log('Connection open!')
-      // sendMessage('Hello, World!!') // spam the server with a "Hello, World!" message on each sucessful cunnection... ;)
     }
 
     /**
