@@ -20,9 +20,6 @@ export default class ChatApp extends AppWindow {
 
     // set defaults
     this.username = 'Dude'
-    storage.remove('messages')
-    this.messages = storage.get('messages') || []
-    if (this.messages.length) this.messages = JSON.parse(this.messages)
 
     // setup elems
     this._titleElem = this.shadowRoot.querySelector('.title')
@@ -31,18 +28,16 @@ export default class ChatApp extends AppWindow {
     this._sendButton = this.shadowRoot.querySelector('button')
     this.setTitle('Live chat')
 
-    // populate messages if existing
-    if (this.messages && this.messages.length) {
-      console.log('messages ->')
-      console.log((this.messages))
+    // get previous messages from localStorage
+    this.messages = storage.get('messages') || []
+    if (this.messages.length) this.messages = JSON.parse(this.messages)
 
+    // populate previously existing messages if exists in localStorage
+    if (this.messages && this.messages.length) {
       for (let i = 0; i < this.messages.length; ++i) {
         let message = this.messages[i]
-        console.log(message)
-        this.addMessage(message.text, message.user, message.time)
+        this.displayMessage(message.text, message.user, message.time) // display only; no save since that will caus loop!
       }
-    } else {
-      console.log('No previous messages...')
     }
 
     // bind click & enter to submit vents
@@ -57,8 +52,6 @@ export default class ChatApp extends AppWindow {
     })
 
     this.setup()
-
-    this.addMessage('Heeey', 'testUser') // test UI
   }
 
   /**
@@ -81,18 +74,27 @@ export default class ChatApp extends AppWindow {
   }
 
   /**
-   * Add a message to the chat window
+   * Add a chat message to the chat window
+   * @param {string} mMssage
+   * @param {string} Usernam
+   * @param {string} Timestamp
+   */
+  displayMessage (message, user, time) {
+    let msg = _.addTo(this._messages, 'p', false, 'message')
+    let msgUser = _.addTo(msg, 'span', user, 'user')
+    let msgMsg = _.addTo(msg, 'span', message, 'text')
+    let msgTime = _.addTo(msg, 'span', time, 'time')
+    return msg
+  }
+
+  /**
+   * Add a message to the chat window, also save it
    * @param {string} message
    * @param {string} user
    */
   addMessage (message, user, time) {
     if (!time || typeof time === undefined) { time = _.timeStamp() }
-
-    // crate html elements for the message
-    let msg = _.addTo(this._messages, 'p', false, 'message')
-    let msgUser = _.addTo(msg, 'span', user, 'user')
-    let msgMsg = _.addTo(msg, 'span', message, 'text')
-    let msgTime = _.addTo(msg, 'span', time, 'time')
+    this.displayMessage(message, user, time)
 
     // save current list of messages in localStorage
     this.messages.push({
@@ -100,6 +102,11 @@ export default class ChatApp extends AppWindow {
       user: user,
       text: message
     })
+
+    this.saveMessages()
+  }
+
+  saveMessages () {
     storage.set('messages', JSON.stringify(this.messages))
   }
 
