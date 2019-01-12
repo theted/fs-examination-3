@@ -74,6 +74,21 @@ template.innerHTML = /* html */`
       opacity: 0.8;
     }
 
+    /**
+     * light thme
+     */
+    :host-context(.light) .header {
+      background: #f3f3f3;
+    }
+
+    :host-context(.light) .header h3 {
+      color: #444;
+    }
+
+    :host-context(.light) .header img {
+      filter: invert(10%);
+    }
+
   </style>
 `
 
