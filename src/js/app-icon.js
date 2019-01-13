@@ -13,6 +13,24 @@ export default class AppIcon extends window.HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(style)
     this.shadowRoot.appendChild(template.content.cloneNode(true))
+    this._imgElem = this.shadowRoot.querySelector('img')
+  }
+
+  setImage (img) {
+    if (img[0] !== '/') img = '/image/icons/' + img + '.png'
+
+    this.image = img
+    this._imgElem.src = this.image
+  }
+
+  static get observedAttributes () {
+    return ['img']
+  }
+
+  attributeChangedCallback (name, oldValue, newValue) {
+    switch (name) {
+      case 'img': this.setImage(newValue); break
+    }
   }
 }
 
