@@ -2,18 +2,10 @@
  * App icons / menu
  */
 import cssTemplate from './app-icons.css.js'
+import Config from './config.js'
+import Storage from './storage.js'
 
-// build list of links
-let links = [
-  'memory',
-  'chat',
-  'notes',
-  'settings'
-]
-
-let openApps = [
-  'chat'
-]
+const storage = new Storage()
 
 export default class AppIcons extends window.HTMLElement {
   constructor () {
@@ -25,10 +17,10 @@ export default class AppIcons extends window.HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this._ul = this.shadowRoot.querySelector('ul')
 
-    for (let link of links) {
+    for (let link of Config.availableApps) {
       let child = this._ul.appendChild(document.createElement('li'))
       let linkElem = child.appendChild(document.createElement('a'))
-      linkElem.textContent = link
+      linkElem.innerHTML = '<img src="/image/icons/' + link + '-app.png"><span class="link-name">' + link + '</span>'
       linkElem.href = '#' + link
       linkElem.id = 'link-' + link
 
@@ -39,19 +31,41 @@ export default class AppIcons extends window.HTMLElement {
     }
 
     // reopen previous open apps
-    for (let app of openApps) {
-      this.toggle(app)
+    for (let app of Config.availableApps) {
+      let prevPosition = storage.getJSON(app + '-app')
+
+      if (prevPosition) {
+        this.toggle(app)
+        let el = document.getElementsByTagName(app + '-app')[0]
+        this.setEl(el, prevPosition.x, prevPosition.y) // set position from saved
+      }
     }
   }
 
-  toggle (link) {
-    let prevElems = document.getElementsByTagName(link + '-app')
+  /**
+   * Show/hide an app depending on if it previously exists or not
+   * @param {string} App name
+   * @param {HTMLElement[]} Previously existing app element(s)
+   */
+  toggle (link, prevElems) {
+    if (!prevElems) prevElems = document.getElementsByTagName(link + '-app')
 
     if (prevElems.length) {
-      prevElems[0].remove()
+      prevElems[0].destroy()
     } else {
       document.body.appendChild(document.createElement(link + '-app', false))
     }
+  }
+
+  /**
+   * Set element position
+   * (required since this module does not extend AppWindow)
+   */
+  setEl (el, x, y) {
+    el.style.top = x + 'px'
+    el.style.left = y + 'px'
+    el.setAttribute('x', x)
+    el.setAttribute('y', y)
   }
 }
 
