@@ -89,6 +89,40 @@ template.innerHTML = /* html */`
       filter: invert(10%);
     }
 
+    :host-context(.light) section {
+      padding: 1.2em;
+      background: linear-gradient(#f6f6f6, #e9e9e9);
+      border-bottom: 1px solid #e0e0e0
+    }
+
+    /**
+     * Dark theme
+     */
+
+    :host-context(.dark) .content {
+      background: #232323;
+      color: #eee;
+    }
+
+
+    /**
+     * Minimal theme
+     */
+    :host-context(.minimal) .header {
+      background: transparent;
+    }
+    :host-context(.minimal) .header h3 {
+      display: none;
+    }
+
+    /**
+     * Weird theme
+     */
+    :host-context(.weird) .content {
+      background: purple;
+      color: white;
+    }
+
   </style>
 `
 
