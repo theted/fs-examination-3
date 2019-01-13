@@ -9,6 +9,7 @@
  */
 import cssTemplate from './appwindow.css.js'
 import htmlTemplate from './appwindow.html.js'
+import './app-icon.js'
 
 export default class AppWindow extends window.HTMLElement {
   constructor () {
@@ -30,11 +31,12 @@ export default class AppWindow extends window.HTMLElement {
 
     // setup sub-elements
     this._contentElem = this.shadowRoot.querySelector('.content')
-    this._titleElem = this.shadowRoot.querySelector('.title')
+    this._titleElem = this.shadowRoot.querySelector('.title h3')
     this._closeElem = this.shadowRoot.querySelector('.close')
     this._moveElem = this.shadowRoot.querySelector('.move')
     this._iconElem = this.shadowRoot.querySelector('.icon img')
     this._iconElem.src = '/image/icons/' + this.tagName.toLowerCase() + '.png'
+    this._appIcon = this.shadowRoot.querySelector('app-icon')
 
     // set initial window dimensions
     this.style.minWidth = this.width + 'px'
@@ -50,19 +52,29 @@ export default class AppWindow extends window.HTMLElement {
     this.addEventListener('click', this._focus)
     this.addEventListener('focusout', this._blur)
     this._closeElem.addEventListener('click', () => this.destroy())
-    this.addEventListener('mousedown', this._dragStart, false)
+    this._setupDragEvents()
+  }
+
+  /**
+   * Update position of element
+   * @param {Element} el (this)
+   * @param {number} x
+   * @param {number} y
+   */
+  setElementPosition (el, x, y) {
+    el.style.top = x + 'px'
+    el.style.left = y + 'px'
+    // el.x = x
+    // el.y = y
+    el.setAttribute('x', x)
+    el.setAttribute('y', y)
   }
 
   /**
    * Set start position
    */
   setStartPosition () {
-    this.style.top = '80px'
-    this.style.left = '80px'
-    this.setAttribute('x', parseInt(this.style.left))
-    this.setAttribute('y', parseInt(this.style.top))
-    // this.x = parseInt(this.style.left)
-    // this.y - parseInt(this.style.top)
+    this.centerElem()
   }
 
   /**
@@ -71,6 +83,7 @@ export default class AppWindow extends window.HTMLElement {
   centerElem () {
     this.x = (window.innerWidth / 2) - (this.width / 2)
     this.y = (window.innerHeight / 2) - (this.height / 2)
+    this.setElementPosition(this, this.x, this.y)
   }
 
   /**
@@ -81,14 +94,19 @@ export default class AppWindow extends window.HTMLElement {
     this.style.height = height + 'px'
   }
 
+  _setupDragEvents () {
+    this.offsetX = parseInt(this.style.left)
+    this.offsetY = parseInt(this.style.top)
+    this.addEventListener('mousedown', this._dragStart, false)
+  }
+
   /**
    * Setup event listeners on drag start
    */
   _dragStart (e) {
     this.dragItem = this
-    this.initialX = e.clientX
-    this.initialY = e.clientY
-    this._contentElem.classList.add('dragging')
+    this.initialX = e.clientX - parseInt(this.x) + this.offsetX
+    this.initialY = e.clientY - parseInt(this.y) + this.offsetY
     this.addEventListener('mouseup', this._dragEnd, false)
     this.addEventListener('mousemove', this._dragUpdate, false)
   }
@@ -98,8 +116,9 @@ export default class AppWindow extends window.HTMLElement {
    */
   _dragUpdate (e) {
     e.preventDefault()
-    this.x = e.clientX - this.initialX
-    this.y = e.clientY - this.initialY
+    this._contentElem.classList.add('dragging')
+    this.x = e.clientX - this.initialX + this.offsetX
+    this.y = e.clientY - this.initialY + this.offsetY
     this.placeElem(this.x, this.y, this.dragItem)
   }
 
@@ -107,6 +126,8 @@ export default class AppWindow extends window.HTMLElement {
    * Stop drag event
    */
   _dragEnd (e) {
+    this.offsetX = this.x
+    this.offsetY = this.y
     this.removeEventListener('mousemove', this._dragUpdate, false)
     this._contentElem.classList.remove('dragging')
   }
