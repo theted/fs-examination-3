@@ -6,6 +6,10 @@ template.innerHTML = /* html */ `
       padding: 0;
     }
 
+    :host {
+      max-width: 460px;
+    }
+
     :host .content {
       display: flex;
       flex-direction: column;
@@ -24,7 +28,7 @@ template.innerHTML = /* html */ `
       padding: 3px;
       display: flex;
       flex-wrap: wrap;
-      word-break: break-all;
+      word-break: break-word;
     }
 
     :host .message:nth-child(even) {
@@ -42,8 +46,9 @@ template.innerHTML = /* html */ `
       order: 2;
       text-align: right;
     }
+
     :host .message .text {
-      color: red;
+      color: #888;
       order: 3;
       flex-basis: 100%;
     }
