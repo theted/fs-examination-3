@@ -98,17 +98,22 @@ export default class AppWindow extends window.HTMLElement {
     this.offsetX = parseInt(this.style.left)
     this.offsetY = parseInt(this.style.top)
     this.addEventListener('mousedown', this._dragStart, false)
+    this.addEventListener('touchstart', this._dragStart, false)
   }
 
   /**
    * Setup event listeners on drag start
    */
   _dragStart (e) {
+    e.preventDefault()
     this.dragItem = this
-    this.initialX = e.clientX - parseInt(this.x) + this.offsetX
-    this.initialY = e.clientY - parseInt(this.y) + this.offsetY
+    let [x, y] = this.getPosition(e)
+    this.initialX = x - parseInt(this.x) + this.offsetX
+    this.initialY = y - parseInt(this.y) + this.offsetY
     this.addEventListener('mouseup', this._dragEnd, false)
     this.addEventListener('mousemove', this._dragUpdate, false)
+    this.addEventListener('touchend', this._dragEnd, false)
+    this.addEventListener('touchmove', this._dragUpdate, false)
   }
 
   /**
@@ -117,8 +122,9 @@ export default class AppWindow extends window.HTMLElement {
   _dragUpdate (e) {
     e.preventDefault()
     this._contentElem.classList.add('dragging')
-    this.x = e.clientX - this.initialX + this.offsetX
-    this.y = e.clientY - this.initialY + this.offsetY
+    let [x, y] = this.getPosition(e)
+    this.x = x - this.initialX + this.offsetX
+    this.y = y - this.initialY + this.offsetY
     this.placeElem(this.x, this.y, this.dragItem)
   }
 
@@ -129,7 +135,17 @@ export default class AppWindow extends window.HTMLElement {
     this.offsetX = this.x
     this.offsetY = this.y
     this.removeEventListener('mousemove', this._dragUpdate, false)
+    this.removeEventListener('touchmove', this._dragUpdate, false)
     this._contentElem.classList.remove('dragging')
+  }
+
+  /**
+   * Get position - support for both mouse & touch events
+   */
+  getPosition (e) {
+    return (e.type === 'touchstart' || e.type === 'touchmove')
+      ? [e.touches[0].clientX, e.touches[0].clientY]
+      : [e.clientX, e.clientY]
   }
 
   /**
