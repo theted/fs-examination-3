@@ -10,6 +10,8 @@
 import cssTemplate from './appwindow.css.js'
 import htmlTemplate from './appwindow.html.js'
 import './app-icon.js'
+import Storage from './storage.js'
+const storage = new Storage()
 
 export default class AppWindow extends window.HTMLElement {
   constructor () {
@@ -34,8 +36,8 @@ export default class AppWindow extends window.HTMLElement {
     this._titleElem = this.shadowRoot.querySelector('.title h3')
     this._closeElem = this.shadowRoot.querySelector('.close')
     this._moveElem = this.shadowRoot.querySelector('.move')
-    this._iconElem = this.shadowRoot.querySelector('.icon img')
-    this._iconElem.src = '/image/icons/' + this.tagName.toLowerCase() + '.png'
+    this._iconElem = this.shadowRoot.querySelector('app-icon')
+    this._iconElem.setAttribute('img', '/image/icons/' + this.tagName.toLowerCase() + '.png')
     this._appIcon = this.shadowRoot.querySelector('app-icon')
 
     // set initial window dimensions
@@ -105,7 +107,6 @@ export default class AppWindow extends window.HTMLElement {
    * Setup event listeners on drag start
    */
   _dragStart (e) {
-    e.preventDefault()
     this.dragItem = this
     let [x, y] = this.getPosition(e)
     this.initialX = x - parseInt(this.x) + this.offsetX
@@ -137,6 +138,7 @@ export default class AppWindow extends window.HTMLElement {
     this.removeEventListener('mousemove', this._dragUpdate, false)
     this.removeEventListener('touchmove', this._dragUpdate, false)
     this._contentElem.classList.remove('dragging')
+    this.savePosition(e)
   }
 
   /**
@@ -146,6 +148,14 @@ export default class AppWindow extends window.HTMLElement {
     return (e.type === 'touchstart' || e.type === 'touchmove')
       ? [e.touches[0].clientX, e.touches[0].clientY]
       : [e.clientX, e.clientY]
+  }
+
+  savePosition (e) {
+    console.log('SAVE', [e.target.tagName.toLowerCase(), this.x, this.y])
+    storage.setJSON(e.target.tagName.toLowerCase(), {
+      x: this.x,
+      y: this.y
+    })
   }
 
   /**
@@ -196,6 +206,7 @@ export default class AppWindow extends window.HTMLElement {
   }
 
   disconnectedCallback () {
+    storage.remove(this.tagName.toLowerCase())
     console.log('Destroying window')
   }
 
