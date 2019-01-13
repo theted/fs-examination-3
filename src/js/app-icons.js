@@ -26,19 +26,14 @@ export default class AppIcons extends window.HTMLElement {
 
       linkElem.addEventListener('click', (event) => {
         event.preventDefault()
-        this.toggle(link)
+        this.createApp(link, 500, 500)
       })
     }
 
     // reopen previous open apps
     for (let app of Config.availableApps) {
       let prevPosition = storage.getJSON(app + '-app')
-
-      if (prevPosition) {
-        this.toggle(app)
-        let el = document.getElementsByTagName(app + '-app')[0]
-        this.setEl(el, prevPosition.x, prevPosition.y) // set position from saved
-      }
+      if (prevPosition) { this.createApp(app, prevPosition.x, prevPosition.y) }
     }
   }
 
@@ -53,8 +48,19 @@ export default class AppIcons extends window.HTMLElement {
     if (prevElems.length) {
       prevElems[0].destroy()
     } else {
-      document.body.appendChild(document.createElement(link + '-app', false))
+      this.createApp(link + '-app')
     }
+  }
+
+  /**
+   * Create new app
+   * @param {string} App name
+   * @param {number} x
+   * @param {number} y
+   */
+  createApp (app, x, y) {
+    let el = document.body.appendChild(document.createElement(app + '-app', false))
+    this.setEl(el, x, y)
   }
 
   /**
