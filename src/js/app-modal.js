@@ -22,6 +22,9 @@ export default class AppMoadal extends window.HTMLElement {
     this._inputElem.addEventListener('keyup', event => {
       if (event.key === 'Enter') { this.submit() }
     })
+
+    // focus input element
+    this._inputElem.focus()
   }
 
   /**
