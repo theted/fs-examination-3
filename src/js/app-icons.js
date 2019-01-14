@@ -26,7 +26,8 @@ export default class AppIcons extends window.HTMLElement {
 
       linkElem.addEventListener('click', (event) => {
         event.preventDefault()
-        this.createApp(link, 500, 500)
+        let [x, y] = this.getNextPosition(link + '-app')
+        this.createApp(link, x, y)
       })
     }
 
@@ -48,7 +49,7 @@ export default class AppIcons extends window.HTMLElement {
     if (prevElems.length) {
       prevElems[0].destroy()
     } else {
-      this.createApp(link + '-app')
+      this.createApp(link + '-app', x, y)
     }
   }
 
@@ -59,8 +60,23 @@ export default class AppIcons extends window.HTMLElement {
    * @param {number} y
    */
   createApp (app, x, y) {
+    if (!x || !y) { [x, y] = this.getNextPosition(app + '-app') }
     let el = document.body.appendChild(document.createElement(app + '-app', false))
     this.setEl(el, x, y)
+  }
+
+  /**
+   * Get starting position for `app`, taking into consideration number
+   * of existing instances of element, adding offset as needed.
+   * TODO: support for "bounce" if height exceeds window height
+   * @param {string} App name
+   */
+  getNextPosition (app) {
+    let offset = 50
+    let start = 300
+    let nums = document.getElementsByTagName(app).length
+    let x = (offset * nums) + start
+    return [x, x]
   }
 
   /**
