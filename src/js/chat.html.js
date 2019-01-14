@@ -1,10 +1,10 @@
 const template = document.createElement('template')
 template.innerHTML = /* html */ `
   <section class="chat-messages"></section>
-  <div class="chat-controls">
-    <input type="text" name="message" id="message" placeholder="Message">
+  <section class="chat-controls alt">
+    <textarea type="text" name="message" id="message"></textarea>
     <button class="submit">Send</button>
-  </div>
+  </section>
 `
 
 export default template
