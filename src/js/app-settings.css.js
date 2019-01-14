@@ -6,7 +6,7 @@ template.innerHTML = /* html */ `
       max-width: 520px;
     }
 
-    :host .images {
+    :host section#backgrounds {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-gap: .5em;
@@ -21,13 +21,17 @@ template.innerHTML = /* html */ `
       grid-column: 1 / -1;
     }
 
-    :host #themes {
+    :host section#themes {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
     }
 
     :host #themes h3 {
       grid-column: 1 / -1;
+    }
+
+    :host .hidden {
+      display: none !important;
     }
 
   </style>

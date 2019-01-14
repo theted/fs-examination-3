@@ -16,8 +16,34 @@ export default class SettingsApp extends AppWindow {
     this._contentElem.appendChild(cssTemplate.content.cloneNode(true))
     this._contentElem.appendChild(htmlTemplate.content.cloneNode(true))
 
+    this._sections = this.shadowRoot.querySelectorAll('section')
+    this._tabsLinks = this.shadowRoot.querySelectorAll('#tabs a')
     this._imagesElem = this.shadowRoot.querySelector('.images')
     this._themesList = this.shadowRoot.querySelector('#themes')
+
+    // setup tabs click actions
+    // TODO: maybe move to parent AppWindow module?
+    this._tabsLinks.forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault()
+        let nAme = event.target.textContent.toLowerCase()
+        console.log('Clicky', '=>', nAme)
+        console.log('SECT', this._sections)
+        this._sections.forEach(section => {
+          section.classList.add('hidden')
+
+          if (section.id == nAme) {
+            section.classList.remove('hidden')
+          }
+        })
+      })
+    })
+
+    this._sections.forEach(section => {
+      console.log(section)
+      section.classList.add('hidden')
+    })
+    this._tabsLinks[2].click() // start at backgrounds
 
     this.setTitle('Settings')
 

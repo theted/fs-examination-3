@@ -1,6 +1,14 @@
 const template = document.createElement('template')
 template.innerHTML = /* html */`
-  <section id="global-options">
+
+  <header id="tabs">
+    <a href="#global">Global</a>
+    <a href="#themes">Themes</a>
+    <a href="#backgrounds">Backgrounds</a>
+    <a href="#options">Options</a>
+  </header>
+
+  <section id="global">
     <h3>Global options</h3>
     <input name="username" value="username">
   </section>
@@ -9,8 +17,13 @@ template.innerHTML = /* html */`
     <h3>Theme</h3>
   </section>
 
-  <section class="images">
+  <section id="backgrounds" class="images">
     <h3>Background image</h3>
+  </section>
+
+  <section id="options">
+    <label for="option-auto-hide">Auto-hide menu</label>
+    <input type="checkbox" name="option-auto-hide">
   </section>
 
 `
