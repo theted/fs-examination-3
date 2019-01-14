@@ -3,6 +3,7 @@
  */
 import AppWindow from './appwindow.js'
 import Storage from './storage.js'
+import htmlTemplate from './notes.html.js'
 import cssTemplate from './notes.css.js'
 const storage = new Storage()
 
@@ -10,18 +11,8 @@ export default class NotesApp extends AppWindow {
   constructor () {
     super()
 
-    // extend default AppWindow content
-    const template = document.createElement('template')
-    template.innerHTML = /* html */ `
-      <div class="notes-content">
-        <textarea name="note"></textarea>
-        <button name="save">Save</button>
-        <span class="state"></span>
-      </div>
-    `
-
     this._contentElem.appendChild(cssTemplate.content.cloneNode(true))
-    this._contentElem.appendChild(template.content.cloneNode(true))
+    this._contentElem.appendChild(htmlTemplate.content.cloneNode(true))
     this._note = this.shadowRoot.querySelector('textarea[name="note"]')
     this._saveBtn = this.shadowRoot.querySelector('button[name="save"]')
     this._stateElem = this.shadowRoot.querySelector('span.state')
