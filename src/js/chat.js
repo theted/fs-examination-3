@@ -3,6 +3,7 @@
  * TODO: persist (some!) latest messages in localStorage
  */
 import AppWindow from './appwindow.js'
+import AppModal from './app-modal.js'
 import Storage from './storage.js'
 import Config from './config.js'
 import * as _ from './helpers.js'
@@ -127,6 +128,9 @@ export default class ChatApp extends AppWindow {
   setup () {
     let _this = this
 
+    // require an username for the chat
+    this.requireUsername()
+
     this.connection = new WebSocket(Config.chatHost, ['soap', 'xmpp'])
 
     this.connection.onopen = function () {
@@ -150,6 +154,28 @@ export default class ChatApp extends AppWindow {
      */
     this.connection.onerror = function (error) {
       console.log('Error!', error)
+    }
+  }
+
+  /**
+   * Require an username from the user. Checks for existing username in storage,
+   * opens a modal asking for an username if no previous username exists.
+   */
+  requireUsername () {
+    let prevUsername = storage.get('username')
+
+    if (prevUsername) {
+      this.setUsername(prevUsername)
+    } else {
+      // add modal to document
+      let modal = document.body.appendChild(document.createElement('app-modal', false))
+      modal.setAttribute('content', 'Please provide an username for the chat')
+      modal.setAttribute('placeholder', 'username')
+
+      // setup event listener for modal submit, handle update of username
+      document.body.addEventListener('modal-update', event => {
+        this.setUsername(event.detail.text)
+      })
     }
   }
 
