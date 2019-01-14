@@ -19,7 +19,7 @@ export default class ChatApp extends AppWindow {
     this._contentElem.appendChild(cssTemplate.content.cloneNode(true))
 
     // set defaults
-    this.username = 'Dude'
+    this.setUsername(Config.defaultUsername)
 
     // setup elems
     this._titleElem = this.shadowRoot.querySelector('.title')
@@ -52,6 +52,15 @@ export default class ChatApp extends AppWindow {
     })
 
     this.setup()
+  }
+
+  /**
+   * Set an username for the chat
+   * @param {String} username
+   */
+  setUsername (username) {
+    this.username = username
+    storage.set('username', username) // save in storage
   }
 
   /**
