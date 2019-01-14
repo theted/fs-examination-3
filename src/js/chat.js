@@ -23,7 +23,6 @@ export default class ChatApp extends AppWindow {
     this.setUsername(Config.defaultUsername)
 
     // setup elems
-    this._titleElem = this.shadowRoot.querySelector('.title')
     this._messages = this.shadowRoot.querySelector('.chat-messages')
     this._messageElem = this.shadowRoot.querySelector('textarea')
     this._sendButton = this.shadowRoot.querySelector('button')
