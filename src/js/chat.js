@@ -24,7 +24,7 @@ export default class ChatApp extends AppWindow {
     // setup elems
     this._titleElem = this.shadowRoot.querySelector('.title')
     this._messages = this.shadowRoot.querySelector('.chat-messages')
-    this._messageElem = this.shadowRoot.querySelector('input')
+    this._messageElem = this.shadowRoot.querySelector('textarea')
     this._sendButton = this.shadowRoot.querySelector('button')
     this.setTitle('Live chat')
 
@@ -124,12 +124,15 @@ export default class ChatApp extends AppWindow {
       console.log('Connection open!')
     }
 
+    this.connection.onclose = function () {
+      console.log('Connection closed')
+    }
+
     /**
      * Display chat messages as they are received from the server
      */
     this.connection.onmessage = function (e) {
       let res = JSON.parse(e.data)
-      console.log('Server says -> : ', res)
       if (res.type === 'message') { _this.addMessage(res.data, res.username) }
     }
 
@@ -146,6 +149,7 @@ export default class ChatApp extends AppWindow {
   }
 
   disconnectedCallback () {
+    this.connection.close()
     console.log('Bye from chat')
   }
 }
