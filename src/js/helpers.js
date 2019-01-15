@@ -1,7 +1,7 @@
 /**
  * Return current timstamp in human-readable format
  */
-function timeStamp() {
+function timeStamp () {
   let dt = new Date()
   return dt.toLocaleTimeString('sv-SE')
 }
@@ -13,7 +13,7 @@ function timeStamp() {
  * @param {String} text
  * @param {String} className
  */
-function addTo(parent, type, text, className) {
+function addTo (parent, type, text, className) {
   let child = parent.appendChild(document.createElement(type))
   if (text) { child.textContent = text }
   if (className) { child.classList.add(className) }
@@ -25,7 +25,7 @@ function addTo(parent, type, text, className) {
  * @param {String} HTML
  * @param {HTML Element} parent
  */
-function addTemplate(html, parent) {
+function addTemplate (html, parent) {
   let template = document.createElement('template')
   template.innerHTML = html
   parent.appendChild(template.content.cloneNode(true))
@@ -36,7 +36,7 @@ function addTemplate(html, parent) {
  * @param {String} img path
  * @param {HTML Element} element
  */
-function setBackgroundImage(img, el) {
+function setBackgroundImage (img, el) {
   el.style.backgroundImage = 'url("' + img + '")'
 }
 
@@ -45,7 +45,7 @@ function setBackgroundImage(img, el) {
  * @param {String} String
  * @returns {String} Safe(r) string
  */
-function safify(str) {
+function safify (str) {
   return str
     .toLowerCase()
     .split(' ').join('_') // replace spaces with underscore | alternative approach -> .replace(/ /g, '-')
