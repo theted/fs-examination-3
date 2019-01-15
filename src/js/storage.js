@@ -80,4 +80,16 @@ export default class Storage {
       }
     }))
   }
+
+  /**
+   * Subscribe to event channel to act on events
+   * @param {*} channel
+   * @param {*} callback
+   * @memberof Storage
+   */
+  subscribe (callback, key = false, channel = 'storage-update', target = document.body) {
+    target.addEventListener(channel, event => {
+      callback(event.detail)
+    })
+  }
 }
