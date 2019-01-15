@@ -22,8 +22,7 @@ template.innerHTML = /* html */`
   </section>
 
   <section id="options">
-    <label for="option-auto-hide">Auto-hide menu</label>
-    <input type="checkbox" name="option-auto-hide">
+    <h3>Options</h3>
   </section>
 
 `
