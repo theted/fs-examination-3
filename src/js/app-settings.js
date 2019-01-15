@@ -21,14 +21,21 @@ export default class SettingsApp extends AppWindow {
     this._imagesElem = this.shadowRoot.querySelector('.images')
     this._themesList = this.shadowRoot.querySelector('#themes')
 
-    // setup tabs click actions
-    // TODO: maybe move to parent AppWindow module?
+    this.setTitle('Settings')
+    this.setupBackgrounds()
+    this.setupThemes()
+    this.setupTabs()
+  }
+
+  /**
+   * Setup tabs & click events
+   * TODO: maybe move to parent AppWindow module?
+   */
+  setupTabs () {
     this._tabsLinks.forEach((link) => {
       link.addEventListener('click', (event) => {
         event.preventDefault()
         let nAme = event.target.textContent.toLowerCase()
-        console.log('Clicky', '=>', nAme)
-        console.log('SECT', this._sections)
         this._sections.forEach(section => {
           section.classList.add('hidden')
 
@@ -39,15 +46,33 @@ export default class SettingsApp extends AppWindow {
       })
     })
 
-    this._sections.forEach(section => {
-      console.log(section)
-      section.classList.add('hidden')
+    // initially hide all tabs
+    this._sections.forEach(section => { section.classList.add('hidden') })
+
+    // start at backgrounds tabs
+    this._tabsLinks[2].click()
+  }
+
+  /**
+   * Create theme buttons & setup click events
+   */
+  setupThemes () {
+    // setup themes
+    Config.availableThemes.forEach((theme) => {
+      let themeElem = document.createElement('p')
+      themeElem.textContent = theme
+      themeElem.addEventListener('click', (event) => {
+        this.setTheme(event.target.textContent)
+      })
+      this._themesList.appendChild(themeElem)
     })
-    this._tabsLinks[2].click() // start at backgrounds
+  }
 
-    this.setTitle('Settings')
-
-    // setup images
+  /**
+   * Create background image elements and setup click events
+   */
+  setupBackgrounds () {
+    // create image elements
     let htmlTemp = ''
 
     for (let i = 0; i < Config.numBackgroundImages; ++i) {
@@ -63,16 +88,6 @@ export default class SettingsApp extends AppWindow {
         _this.setBackgroundImage(this.src, document.body)
       }
     }
-
-    // setup themes
-    Config.availableThemes.forEach((theme) => {
-      let themeElem = document.createElement('p')
-      themeElem.textContent = theme
-      themeElem.addEventListener('click', (event) => {
-        this.setTheme(event.target.textContent)
-      })
-      this._themesList.appendChild(themeElem)
-    })
   }
 
   // TODO: remove duplication
