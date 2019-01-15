@@ -24,6 +24,12 @@ template.innerHTML = /* html */`
       transition: opacity 150ms;
     }
 
+    :host .alt {
+      background: #202020 !important;
+      color: #f9f9f9;
+      /* display: block !important; */
+    }
+
     :host .header {
       display: flex;
       align-items: stretch;
@@ -38,6 +44,8 @@ template.innerHTML = /* html */`
       flex: 1;
       color: #eee;
       padding: 1em;
+      border-left: 1px solid rgba(130, 130, 130, 0.12);
+      border-right: 1px solid rgba(130, 130, 130, 0.12);
     }
 
     :host .title :hover {
@@ -110,7 +118,18 @@ template.innerHTML = /* html */`
      */
     :host-context(.minimal) .header {
       background: transparent;
+      padding-left: 0;
+      padding-right: 0;
     }
+
+    :host-context(.minimal) .icon, :host-context(.minimal) .close {
+      padding: 0;
+    }
+
+    :host-context(.minimal) .title {
+      border: none;
+    }
+
     :host-context(.minimal) .header h3 {
       display: none;
     }
