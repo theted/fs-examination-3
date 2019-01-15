@@ -11,13 +11,13 @@ template.innerHTML = /* html */ `
       display: grid;
       grid-gap: 10px;
       grid-template-columns: repeat(4, 1fr);
-      background: rgba(0,0,0,0.2);
     }
 
     :host .tiles img {
       width: auto;
       height: auto;
       max-width: 100%;
+      transition: box-shadow 500ms;
     }
 
     :host .success {
