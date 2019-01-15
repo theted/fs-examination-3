@@ -43,6 +43,7 @@ export default class NotesApp extends AppWindow {
 
   setupNotes () {
     let notnotes = document.createElement('ul')
+    notnotes.classList.add('list')
 
     this.notes.forEach(note => {
       let noteElem = document.createElement('li')
@@ -71,6 +72,7 @@ export default class NotesApp extends AppWindow {
     let noteData = storage.get(noteName)
 
     // set data ....
+    console.log((noteDate) ? noteData : 'No data for ' + note)
 
     this.showNote(note, noteData, noteName)
     this.currentNote = noteName

@@ -82,6 +82,25 @@ template.innerHTML = /* html */`
       opacity: 0.8;
     }
 
+
+    /**
+     * Special elements
+     */
+    .list a {
+      transition: all 400ms;
+      background: linear-gradient(rgba(250, 250, 250, 0.4), rgba(200, 200, 200, 0.45));
+    }
+
+    .list a:nth-child(even) {
+      background: linear-gradient(rgba(50, 150, 150, 0.4), rgba(100, 100, 100, 0.45));
+    }
+
+    .list a:hover {
+      cursor: pointer;
+      background: linear-gradient(rgba(250, 250, 250, 0.6), rgba(230, 230, 230, 0.6));
+    }
+
+
     /**
      * light thme
      */
