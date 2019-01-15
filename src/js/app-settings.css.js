@@ -28,7 +28,9 @@ template.innerHTML = /* html */ `
 
     :host .images img {
       width: 100%;
-      object-fit: contain;
+      object-fit: cover;
+      height: max-content;
+      max-height: 120px;
     }
 
     :host .images h3 {
