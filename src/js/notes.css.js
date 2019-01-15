@@ -16,6 +16,10 @@ template.innerHTML = /* html */ `
      * Note edit
      */
 
+    :host #notes-edit {
+      padding: 0;
+    }
+
     :host textarea {
       width: calc(100% - 2em - 2px);
       min-height: 140px;
@@ -45,6 +49,26 @@ template.innerHTML = /* html */ `
       padding: 1em;
       display: block;
       border-bottom: 1px solid rgba(0,0,0,0.15);
+    }
+
+
+    /**
+     * Controls
+     */
+
+    #notes-controls {
+      display: flex !important;
+      justify-content: space-between;
+      padding: 0;
+    }
+
+    #notes-controls button {
+      flex: 1;
+      padding: 1em;
+    }
+
+    #notes-controls span {
+      display: none;
     }
 
 
