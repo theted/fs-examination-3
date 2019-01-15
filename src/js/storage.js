@@ -70,6 +70,8 @@ export default class Storage {
   * @param {HTML Element} Target (default: document.body)
   */
   publish (key, value, eventName = 'storage-update', target = document.body) {
+    this.set(key, value)
+
     target.dispatchEvent(new window.CustomEvent(eventName, {
       bubbles: true,
       detail: {
