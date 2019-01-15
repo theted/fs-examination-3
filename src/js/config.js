@@ -5,7 +5,7 @@ const configs = {
   chatHost: 'ws://vhost3.lnu.se:20080/socket/',
   apiKey: 'eDBE76deU7L0H9mEBgxUKVR0VCnq0XBd',
   defaultChatChannel: 'my, not so secret, channel',
-  defaultUsername: 'Dude',
+  defaultUsername: 'Dude ⚡',
   maxChatMessages: 100,
   numBackgroundImages: 12,
   animationDuration: 500,
@@ -21,7 +21,11 @@ const configs = {
     'minimal',
     'weird'
   ],
-  defaultTheme: 'light'
+  defaultTheme: 'light',
+  availableOptions: {
+    autoHide: 'Auto-hide navigation',
+    spec: 'Test'
+  }
 }
 
 export default configs
