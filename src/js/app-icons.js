@@ -36,6 +36,17 @@ export default class AppIcons extends window.HTMLElement {
       let prevPosition = storage.getJSON(app + '-app')
       if (prevPosition) { this.createApp(app, prevPosition.x, prevPosition.y) }
     }
+
+    // listen and change on storage events ....
+    storage.subscribe((data) => {
+      if (data.key === 'settings-autoHide') {
+        this.style.opacity = (data.value) ? 0 : 1
+      }
+
+      if (data.key === 'settings-spec' && data.value) {
+        console.log('Test active!')
+      }
+    })
   }
 
   /**
