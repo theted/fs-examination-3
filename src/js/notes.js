@@ -21,8 +21,13 @@ export default class NotesApp extends AppWindow {
     this._notesList = this.shadowRoot.querySelector('#notes-list')
     this._noteElem = this.shadowRoot.querySelector('#notes-edit')
     this._saveBtn = this.shadowRoot.querySelector('button[name="save"]')
+    this._newBtn = this.shadowRoot.querySelector('button[name="new"]')
+    this._closeBtn = this.shadowRoot.querySelector('button[name="close"]')
     this._stateElem = this.shadowRoot.querySelector('span.state')
+
     this._saveBtn.addEventListener('click', () => this._update())
+    this._closeBtn.addEventListener('click', event => { console.log('CLOSE click!') })
+    this._newBtn.addEventListener('click', event => { console.log('NEW click!') })
 
     // set window title & get current not from storage
     this.setTitle('Notes')
@@ -57,10 +62,12 @@ export default class NotesApp extends AppWindow {
 
   selectNote (note) {
     // get data
-    let noteData = storage.get(_.safify(note))
+    let noteName = _.safify(note)
+    let noteData = storage.get(noteName)
 
     // set data ....
-
+    this.currentNote = noteName
+    // this._note.value = noteData
     this.setTitle(note)
 
     this._notesList.classList.add('hidden')
@@ -77,6 +84,7 @@ export default class NotesApp extends AppWindow {
    * Save note to storage on upt
    */
   _update () {
+    console.log('SAVE note!')
     storage.set('note', this._note.value)
   }
 }
