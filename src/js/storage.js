@@ -5,7 +5,7 @@ export default class Storage {
    * @returns {string} value
    */
   get (key) {
-    return localStorage.getItem(key)
+    return window.localStorage.getItem(key)
   }
 
   /**
@@ -23,7 +23,7 @@ export default class Storage {
    * @param {string} val
    */
   set (key, val) {
-    localStorage.setItem(key, val)
+    window.localStorage.setItem(key, val)
   }
 
   /**
@@ -40,7 +40,7 @@ export default class Storage {
    * @param {string} key
    */
   remove (key) {
-    localStorage.removeItem(key)
+    window.localStorage.removeItem(key)
   }
 
   /**
@@ -49,8 +49,8 @@ export default class Storage {
    */
   keys () {
     var keys = []
-    for (var i = 0, len = localStorage.length; i < len; ++i) {
-      keys.push(localStorage.key(i))
+    for (var i = 0, len = window.localStorage.length; i < len; ++i) {
+      keys.push(window.localStorage.key(i))
     }
     return keys
   }
@@ -70,7 +70,7 @@ export default class Storage {
   * @param {HTML Element} Target (default: document.body)
   */
   publish (key, value, eventName = 'storage-update', target = document.body) {
-    target.dispatchEvent(new CustomEvent(eventName, {
+    target.dispatchEvent(new window.CustomEvent(eventName, {
       bubbles: true,
       detail: {
         key: key,
