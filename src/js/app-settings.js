@@ -20,11 +20,13 @@ export default class SettingsApp extends AppWindow {
     this._tabsLinks = this.shadowRoot.querySelectorAll('#tabs a')
     this._imagesElem = this.shadowRoot.querySelector('.images')
     this._themesList = this.shadowRoot.querySelector('#themes')
+    this._optionsElem = this.shadowRoot.querySelector('#options')
 
     this.setTitle('Settings')
     this.setupBackgrounds()
     this.setupThemes()
     this.setupTabs()
+    this.setupOptions()
   }
 
   /**
@@ -87,6 +89,31 @@ export default class SettingsApp extends AppWindow {
       elements[i].onclick = function () {
         _this.setBackgroundImage(this.src, document.body)
       }
+    }
+  }
+
+  /**
+   * Setup options
+   */
+  setupOptions () {
+    for (let option in Config.availableOptions) {
+      // TODO: use template?
+      // TODO: set initial checked state based on existing config
+
+      let templateHtml = /* html */ `
+        <input type="checkbox" name="${option}">
+        <label for="${option}">${Config.availableOptions[option]}</label>
+        <br>
+      `
+
+      _.addTemplate(templateHtml, this._optionsElem)
+
+      let optionElem = this._optionsElem.querySelector('input[name="' + option + '"]')
+
+      // save & publish value when input is clicked
+      optionElem.addEventListener('click', event => {
+        storage.publish('settings-' + option, event.target.checked)
+      })
     }
   }
 
