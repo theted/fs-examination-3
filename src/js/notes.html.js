@@ -5,10 +5,11 @@ template.innerHTML = /* html */ `
     <section id="notes-list"></section>
     <section id="notes-edit">
       <textarea name="note"></textarea>
-      <button name="save">Save</button>
     </section>
     <section id="notes-controls" class="alt">
+      <button name="save">Save</button>
       <button name="new">New</button>
+      <button name="close">Close</button>
       <span class="state"></span>
     </section>
   </div>
