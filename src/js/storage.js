@@ -61,4 +61,21 @@ export default class Storage {
       console.log(storageKeys[i], '->', this.get(storageKeys[i]))
     }
   }
+
+  /**
+  * Dispatch an update event
+  * @param {String} key
+  * @param {*} value
+  * @param {String} event name (default: `storage-update`)
+  * @param {HTML Element} Target (default: document.body)
+  */
+  publish (key, value, eventName = 'storage-update', target = document.body) {
+    target.dispatchEvent(new CustomEvent(eventName, {
+      bubbles: true,
+      detail: {
+        key: key,
+        value: value
+      }
+    }))
+  }
 }
