@@ -27,6 +27,15 @@ export default class Storage {
   }
 
   /**
+   * Save object as JSON
+   * @param {String} key
+   * @param {Object} data
+   */
+  setJSON (key, val) {
+    return this.set(key, JSON.stringify(val))
+  }
+
+  /**
    * Remove key from localStorage
    * @param {string} key
    */
