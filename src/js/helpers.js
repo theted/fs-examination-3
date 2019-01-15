@@ -40,9 +40,22 @@ function setBackgroundImage(img, el) {
   el.style.backgroundImage = 'url("' + img + '")'
 }
 
+/**
+ * Return a safe-to-use string from string
+ * @param {String} String
+ * @returns {String} Safe(r) string
+ */
+function safify(str) {
+  return str
+    .toLowerCase()
+    .split(' ').join('_') // replace spaces with underscore | alternative approach -> .replace(/ /g, '-')
+    .replace(/\W/g, '') // remove non-alphanumeric (or underscore) characters
+}
+
 export {
   timeStamp,
   addTo,
   addTemplate,
-  setBackgroundImage
+  setBackgroundImage,
+  safify
 }
