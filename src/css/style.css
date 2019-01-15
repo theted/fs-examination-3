@@ -14,6 +14,19 @@ body {
 
 
 /**
+ * Helper classes
+ */
+.hidden {
+  display: none !important;
+}
+
+.animated {
+  animation-duration: 400ms;
+  animation-fill-mode: both;
+}
+
+
+/**
  * Animations - courtesy of https://github.com/daneden/animate.css
  */
 
