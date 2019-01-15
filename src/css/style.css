@@ -9,6 +9,7 @@ body {
   overflow: hidden;
   background-size: cover;
   background-position: fixed;
+  transition: background 400ms linear;
 }
 
 
