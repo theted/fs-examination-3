@@ -1,3 +1,5 @@
+import cssTemplate from './app-icon.css.js'
+
 export default class AppIcon extends window.HTMLElement {
   constructor () {
     super()
@@ -5,13 +7,10 @@ export default class AppIcon extends window.HTMLElement {
     this.image = '/image/icons/' + imgUrl + '.png'
 
     const template = document.createElement('template')
-    const style = document.createElement('style')
-
     template.innerHTML = /* html */ `<img class="app-icon" src="${this.image}">`
-    style.textContent = /* css */ `:host img { max-width: 18px; width: auto; height: auto; }`
 
     this.attachShadow({ mode: 'open' })
-    this.shadowRoot.appendChild(style)
+    this.shadowRoot.appendChild(cssTemplate.content.cloneNode(true))
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this._imgElem = this.shadowRoot.querySelector('img')
   }
