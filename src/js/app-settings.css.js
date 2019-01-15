@@ -6,10 +6,24 @@ template.innerHTML = /* html */ `
       max-width: 520px;
     }
 
+    :host header {
+      display: flex;
+      justify-content: space-around;
+      background: linear-gradient(#e9e9e9, #fafafa);
+      border-bottom: 1px solid rgba(222, 222, 222, 0.3);
+    }
+
+    :host header a {
+      padding: 1em;
+      color: #333;
+      text-decoration: none;
+      border-right: 1px solid rgba(222, 222, 222, 0.2);
+    }
+
     :host section#backgrounds {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      grid-gap: .5em;
+      grid-gap: 1em;
     }
 
     :host .images img {
