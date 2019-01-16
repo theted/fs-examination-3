@@ -13,8 +13,8 @@ export default class AppWindow extends window.HTMLElement {
     super()
 
     // setup default properties
-    this.x = this.style.top
-    this.y = this.style.left
+    this.x = parseInt(this.style.top)
+    this.y = parseInt(this.style.left)
     this.focus = false
 
     // set windows dimensions
@@ -126,8 +126,8 @@ export default class AppWindow extends window.HTMLElement {
     e.preventDefault()
     this._contentElem.classList.add('dragging')
     let [x, y] = this.getPosition(e)
-    this.x = x - this.initialX + this.offsetX
-    this.y = y - this.initialY + this.offsetY
+    this.x = parseInt(x - this.initialX + this.offsetX)
+    this.y = parseInt(y - this.initialY + this.offsetY)
     this.placeElem(this.x, this.y, this.dragItem)
   }
 
