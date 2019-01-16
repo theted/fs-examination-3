@@ -53,6 +53,7 @@ export default class AppWindow extends window.HTMLElement {
     // bind event listeners
     this.addEventListener('click', this._focus)
     this.addEventListener('focusout', this._blur)
+    this.addEventListener('blur', this._blur)
     this._closeElem.addEventListener('click', () => this.destroy())
     this._setupDragEvents()
   }
@@ -193,12 +194,23 @@ export default class AppWindow extends window.HTMLElement {
 
   _focus () {
     console.log('Focus window')
-    this.style.zIndex = 2
+
+    // loop through all other elements to remove focused class... - not the most pretty way!
+    let allElems = document.body.children
+    for (let elem of allElems) {
+      if (elem._contentElem) {
+        if (elem.tagName == this.tagName) {
+          elem.classList.add('focused')
+        } else {
+          elem.classList.remove('focused')
+        }
+      }
+    }
   }
 
   _blur () {
     console.log('Blur window')
-    this.style.zIndex = 1
+    this.classList.remove('focused')
   }
 
   connectedCallback () {

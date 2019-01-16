@@ -1,6 +1,7 @@
 const template = document.createElement('template')
 template.innerHTML = /* html */`
 <style>
+
   :host {
       display: flex;
       flex-direction: column;
@@ -11,6 +12,7 @@ template.innerHTML = /* html */`
       filter: drop-shadow(2px 5px 20px rgba(0,0,0,0.5));
       animation-duration: 300ms;
       animation-fill-mode: both;
+      z-index: 2;
     }
 
     :host h3 {
@@ -78,9 +80,6 @@ template.innerHTML = /* html */`
       filter: invert(0%);
     }
 
-    :host .dragging {
-      opacity: 0.8;
-    }
 
 
     /**
@@ -160,6 +159,29 @@ template.innerHTML = /* html */`
       background: purple;
       color: white;
     }
+
+
+    /**
+     * Focus state
+     */
+
+    :host-context(.focused) {
+      filter: drop-shadow(2px 5px 25px rgba(0,0,0,0.7));
+      z-index: 100;
+    }
+
+
+    /**
+     * Dragging state
+     */
+
+    :host-context(.dragging),
+    :host .dragging {
+      opacity: 0.8;
+    }
+
+
+
 
   </style>
 `
