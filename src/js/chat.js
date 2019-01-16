@@ -70,7 +70,7 @@ export default class ChatApp extends AppWindow {
 
     this.connection.send(JSON.stringify({
       type: 'message',
-      'data': message,
+      'data': this.sanitize(message),
       'username': username,
       'channel': Config.defaultChatChannel,
       'key': Config.apiKey
@@ -113,6 +113,25 @@ export default class ChatApp extends AppWindow {
     })
 
     this.saveMessages()
+  }
+
+  /**
+   * Sanitize string to prevent injection of HTML & JS in messages
+   * @param {String} string
+   * @returns {String} sanitized string
+   * @memberof ChatApp
+   */
+  sanitize (string) {
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      '/': '&#x2F;'
+    }
+    const reg = /[&<>"'/]/ig
+    return string.replace(reg, (match) => (map[match]))
   }
 
   saveMessages () {
