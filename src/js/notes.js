@@ -68,11 +68,13 @@ export default class NotesApp extends AppWindow {
 
   selectNote (note) {
     // get data
-    let noteName = _.safify(note)
+    let noteName = 'note-' + _.safify(note)
     let noteData = storage.get(noteName)
 
     // set data ....
-    console.log((noteDate) ? noteData : 'No data for ' + note)
+    console.log((noteData) || 'No data for ' + noteName)
+
+    if (!noteData) noteData = '(empty note)'
 
     this.showNote(note, noteData, noteName)
     this.currentNote = noteName
@@ -81,7 +83,10 @@ export default class NotesApp extends AppWindow {
     console.log('View note ->', note, _.safify(note), noteData)
   }
 
-  showNote (title = false, content = false, name) {
+  showNote (title = false, content = false, name = false) {
+    if (!title) title = 'New note'
+    if (!name) name = _.safify(title)
+
     this._noteTitle.value = title
     this._note.value = content
 
@@ -112,9 +117,12 @@ export default class NotesApp extends AppWindow {
    * Save note to storage on upt
    */
   _update () {
+    // TODO: update list of notes if is new note..
+
     // TODO: require title and content fields to be non-empty
-    console.log('SAVE note!')
+    console.log('SAVE note!', this.currentNote)
     storage.set('note', this._note.value)
+    storage.set(this.currentNote, this._note.value)
   }
 }
 
