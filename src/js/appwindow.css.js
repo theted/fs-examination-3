@@ -9,10 +9,11 @@ template.innerHTML = /* html */`
       margin: 0;
       padding: 0;
       /*box-shadow: 3px 8px 76px 29px rgba( 20, 20, 20, 0.45 );*/
-      filter: drop-shadow(2px 5px 20px rgba(0,0,0,0.5));
+      filter: drop-shadow(2px 5px 8px rgba(0,0,0,0.4));
       animation-duration: 300ms;
       animation-fill-mode: both;
       z-index: 2;
+      transition: filter 1500ms;
     }
 
     :host section {
@@ -85,10 +86,10 @@ template.innerHTML = /* html */`
     }
 
 
-
     /**
      * Special elements
      */
+
     .list a {
       transition: all 400ms;
       background: linear-gradient(rgba(250, 250, 250, 0.4), rgba(200, 200, 200, 0.45));
@@ -107,6 +108,7 @@ template.innerHTML = /* html */`
     /**
      * light thme
      */
+
     :host-context(.light) .header {
       background: #f3f3f3;
     }
@@ -123,6 +125,7 @@ template.innerHTML = /* html */`
       background: linear-gradient(#f6f6f6, #e9e9e9);
       border-bottom: 1px solid #e0e0e0
     }
+
 
     /**
      * Dark theme
@@ -160,9 +163,11 @@ template.innerHTML = /* html */`
       display: none;
     }
 
+
     /**
      * Weird theme
      */
+
     :host-context(.weird) .content {
       background: purple;
       color: white;
@@ -174,9 +179,10 @@ template.innerHTML = /* html */`
      */
 
     :host-context(.focused) {
-      filter: drop-shadow(2px 5px 25px rgba(0,0,0,0.7));
+      filter: drop-shadow(2px 5px 20px rgba(0,0,0,0.75));
       z-index: 100;
     }
+
 
 
     /**
@@ -187,8 +193,6 @@ template.innerHTML = /* html */`
     :host .dragging {
       opacity: 0.8;
     }
-
-
 
 
   </style>
