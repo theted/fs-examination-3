@@ -86,9 +86,9 @@ export default class SettingsApp extends AppWindow {
     // setup click events for each imag
     let elements = this._contentElem.getElementsByTagName('img')
     for (let i = 0, len = elements.length; i < len; i++) {
-      elements[i].onclick = function () {
-        _this.setBackgroundImage(this.src, document.body)
-      }
+      elements[i].addEventListener('click', event => {
+        this.setBackgroundImage(event.target.src, document.body)
+      })
     }
   }
 
