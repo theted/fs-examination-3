@@ -15,6 +15,10 @@ template.innerHTML = /* html */`
       z-index: 2;
     }
 
+    :host section {
+      padding: 1.2em;
+    }
+
     :host h3 {
       padding: 0;
       margin: 0;
@@ -116,7 +120,6 @@ template.innerHTML = /* html */`
     }
 
     :host-context(.light) section {
-      padding: 1.2em;
       background: linear-gradient(#f6f6f6, #e9e9e9);
       border-bottom: 1px solid #e0e0e0
     }
@@ -134,6 +137,11 @@ template.innerHTML = /* html */`
     /**
      * Minimal theme
      */
+
+    :host-context(.minimal) .section {
+      padding: 0;
+    }
+
     :host-context(.minimal) .header {
       background: transparent;
       padding-left: 0;
