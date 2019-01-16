@@ -109,6 +109,7 @@ export default class AppWindow extends window.HTMLElement {
    */
   _dragStart (e) {
     this.dragItem = this
+    this._focus()
     let [x, y] = this.getPosition(e)
     this.initialX = x - parseInt(this.x) + this.offsetX
     this.initialY = y - parseInt(this.y) + this.offsetY
