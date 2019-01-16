@@ -117,12 +117,21 @@ export default class SettingsApp extends AppWindow {
     }
   }
 
-  // TODO: remove duplication
+  /**
+   * Set background image
+   * @param {String} img URL
+   * @memberof SettingsApp
+   */
   setBackgroundImage (img) {
     _.setBackgroundImage(img, document.body)
     storage.set('settings-background', img)
   }
 
+  /**
+   * Set application theme
+   * @param {String} theme
+   * @memberof SettingsApp
+   */
   setTheme (theme) {
     document.body.className = theme
   }
