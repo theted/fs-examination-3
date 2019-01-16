@@ -1,11 +1,6 @@
 /**
  * Window manager module
- *
- * TODO: add support for any type of main content
  * TODO: add support for resizing windows
- * TODO: add support for moving windows
- * TODO: add support for focus / handle z-index as correctly
- * TODO: add support for closing windows
  */
 import cssTemplate from './appwindow.css.js'
 import htmlTemplate from './appwindow.html.js'
@@ -97,6 +92,9 @@ export default class AppWindow extends window.HTMLElement {
     this.style.height = height + 'px'
   }
 
+  /**
+   * Setup drag events
+   */
   _setupDragEvents () {
     this.offsetX = parseInt(this.style.left)
     this.offsetY = parseInt(this.style.top)
@@ -106,6 +104,7 @@ export default class AppWindow extends window.HTMLElement {
 
   /**
    * Setup event listeners on drag start
+   * @param {Mouse Event} Mouse event
    */
   _dragStart (e) {
     this.dragItem = this
@@ -121,6 +120,7 @@ export default class AppWindow extends window.HTMLElement {
 
   /**
    * Handle drag event update
+   * @param {Mouse Event} Mouse event
    */
   _dragUpdate (e) {
     e.preventDefault()
@@ -133,6 +133,7 @@ export default class AppWindow extends window.HTMLElement {
 
   /**
    * Stop drag event
+   * @param {Mouse Event} Mouse event
    */
   _dragEnd (e) {
     this.offsetX = this.x
@@ -145,6 +146,7 @@ export default class AppWindow extends window.HTMLElement {
 
   /**
    * Get position - support for both mouse & touch events
+   * @param {Mouse Event} Mouse event
    */
   getPosition (e) {
     return (e.type === 'touchstart' || e.type === 'touchmove')
@@ -152,6 +154,10 @@ export default class AppWindow extends window.HTMLElement {
       : [e.clientX, e.clientY]
   }
 
+  /**
+   * Save position of element
+   * @param {Mouse Event} Mouse event
+   */
   savePosition (e) {
     console.log('SAVE', [e.target.tagName.toLowerCase(), this.x, this.y])
     storage.setJSON(e.target.tagName.toLowerCase(), {
@@ -187,15 +193,19 @@ export default class AppWindow extends window.HTMLElement {
     this._contentElem.innerHTML = content
   }
 
+  /**
+   * Animate element destruction
+   */
   destroy () {
     console.log('Will remove...')
     this.classList.add('zoomOut')
     setTimeout(() => { this.remove() }, 500)
   }
 
+  /**
+   * Focus element
+   */
   _focus () {
-    console.log('Focus window')
-
     // loop through all other elements to remove focused class... - not the most pretty way!
     let allElems = document.body.children
     for (let elem of allElems) {
@@ -209,24 +219,47 @@ export default class AppWindow extends window.HTMLElement {
     }
   }
 
+  /**
+   * Remove focus from element
+   */
   _blur () {
     console.log('Blur window')
     this.classList.remove('focused')
   }
 
+  /**
+   * Actions performed when element is created
+   */
   connectedCallback () {
     console.log('Creating new window')
   }
 
+  /**
+   * Actions performed when element is removed
+   */
   disconnectedCallback () {
+    // remove
     storage.remove(this.tagName.toLowerCase())
     console.log('Destroying window')
   }
 
+  /**
+   * Set observed attributes
+   * @readonly
+   * @static
+   * @memberof AppWindow
+   */
   static get observedAttributes () {
     return ['title', 'content', 'x', 'y', 'width', 'height']
   }
 
+  /**
+   * Handle attribute change
+   * @param {String} name
+   * @param {String} oldValue
+   * @param {String} newValue
+   * @memberof AppWindow
+   */
   attributeChangedCallback (name, oldValue, newValue) {
     console.log(`Change "${name}" from "${oldValue}" to "${newValue}"`)
 
