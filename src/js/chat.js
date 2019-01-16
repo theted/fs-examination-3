@@ -19,9 +19,6 @@ export default class ChatApp extends AppWindow {
     this._contentElem.appendChild(htmlTemplate.content.cloneNode(true))
     this._contentElem.appendChild(cssTemplate.content.cloneNode(true))
 
-    // set defaults
-    this.setUsername(Config.defaultUsername)
-
     // setup elems
     this._messages = this.shadowRoot.querySelector('.chat-messages')
     this._messageElem = this.shadowRoot.querySelector('textarea')
