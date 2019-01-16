@@ -51,6 +51,7 @@ export default class AppWindow extends window.HTMLElement {
     this.addEventListener('blur', this._blur)
     this._closeElem.addEventListener('click', () => this.destroy())
     this._setupDragEvents()
+    this._focus()
   }
 
   /**
