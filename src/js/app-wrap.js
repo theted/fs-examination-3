@@ -1,7 +1,6 @@
 /**
- * main app wrapper
- * TODO: read and set configs on initialization
- * TODO: remember open windows & positions
+ * Main app wrapper - global component responsible for application initialization
+ * and wrapping of sub-modules.
  */
 import './app-icons.js'
 import * as _ from './helpers.js'
