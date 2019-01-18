@@ -41,6 +41,12 @@ export default class MemoryApp extends AppWindow {
     this._failsElement.textContent = 0
     this._scoreElement.textContent = this.numTiles
     this._accurracyElement.textContent = '0 %'
+
+    document.body.addEventListener('keyup', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        this.clickTile(this.shadowRoot.activeElement)
+      }
+    })
   }
 
   /**
@@ -62,6 +68,7 @@ export default class MemoryApp extends AppWindow {
     let tile = document.createElement('img')
     tile.src = this.defaultTile
     tile.setAttribute('image-number', number + 1)
+    tile.setAttribute('tabindex', 0)
     tile.addEventListener('click', (event) => this.clickTile(event.target))
     this._tilesElem.appendChild(tile)
   }
