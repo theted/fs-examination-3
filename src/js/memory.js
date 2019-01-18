@@ -155,6 +155,7 @@ export default class MemoryApp extends AppWindow {
   removeTile (tile) {
     tile.src = '/image/pixel.png'
     tile.removeEventListener('click', this.clickTile, false)
+    tile.setAttribute('tabindex', -1)
   }
 
   /**
