@@ -27,12 +27,12 @@ export default class AppWrap extends window.HTMLElement {
    */
   init () {
     // set theme
-    let theme = storage.get('setting-theme') || Config.defaultTheme
+    let theme = storage.get('setting-theme') || Config.defaults.theme
     document.body.className = theme
 
     // set background image
-    this.background = storage.get('settings-background')
-    if (this.background) { _.setBackgroundImage(this.background, document.body) }
+    this.background = storage.get('settings-background') || Config.defaults.background
+    _.setBackgroundImage(this.background, document.body)
   }
 }
 

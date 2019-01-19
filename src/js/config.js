@@ -13,7 +13,8 @@ const configs = {
     'memory',
     'chat',
     'notes',
-    'settings'
+    'settings',
+    'about'
   ],
   availableThemes: [
     'light',
@@ -21,10 +22,13 @@ const configs = {
     'minimal',
     'weird'
   ],
-  defaultTheme: 'light',
   availableOptions: {
     autoHide: 'Auto-hide navigation',
     spec: 'Test'
+  },
+  defaults: {
+    theme: 'light',
+    background: '/image/backgrounds/0.jpg'
   }
 }
 
