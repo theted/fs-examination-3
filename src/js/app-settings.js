@@ -134,6 +134,7 @@ export default class SettingsApp extends AppWindow {
    */
   setTheme (theme) {
     document.body.className = theme
+    storage.set('setting-theme', theme)
   }
 }
 
