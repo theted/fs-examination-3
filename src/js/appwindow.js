@@ -46,12 +46,14 @@ export default class AppWindow extends window.HTMLElement {
     this.classList.add('zoomIn')
 
     // bind event listeners
-    this.addEventListener('click', this._focus)
-    this.addEventListener('focusout', this._blur)
+    this.addEventListener('mousedown', this._focus)
     this.addEventListener('blur', this._blur)
+
     this._closeElem.addEventListener('click', () => this.destroy())
+
     this._setupDragEvents()
-    this._focus()
+    this._focus() // set initial focus
+    this.savePosition() // save initial position
   }
 
   /**
@@ -109,7 +111,7 @@ export default class AppWindow extends window.HTMLElement {
    */
   _dragStart (e) {
     this.dragItem = this
-    this._focus()
+    this._contentElem.classList.add('dragging')
     let [x, y] = this.getPosition(e)
     this.initialX = x - parseInt(this.x) + this.offsetX
     this.initialY = y - parseInt(this.y) + this.offsetY
@@ -125,7 +127,6 @@ export default class AppWindow extends window.HTMLElement {
    */
   _dragUpdate (e) {
     e.preventDefault()
-    this._contentElem.classList.add('dragging')
     let [x, y] = this.getPosition(e)
     this.x = parseInt(x - this.initialX + this.offsetX)
     this.y = parseInt(y - this.initialY + this.offsetY)
@@ -142,7 +143,7 @@ export default class AppWindow extends window.HTMLElement {
     this.removeEventListener('mousemove', this._dragUpdate, false)
     this.removeEventListener('touchmove', this._dragUpdate, false)
     this._contentElem.classList.remove('dragging')
-    this.savePosition(e)
+    this.savePosition()
   }
 
   /**
@@ -157,11 +158,9 @@ export default class AppWindow extends window.HTMLElement {
 
   /**
    * Save position of element
-   * @param {Mouse Event} Mouse event
    */
-  savePosition (e) {
-    console.log('SAVE', [e.target.tagName.toLowerCase(), this.x, this.y])
-    storage.setJSON(e.target.tagName.toLowerCase(), {
+  savePosition () {
+    storage.setJSON(this.tagName.toLowerCase(), {
       x: this.x,
       y: this.y
     })
@@ -198,7 +197,6 @@ export default class AppWindow extends window.HTMLElement {
    * Animate element destruction
    */
   destroy () {
-    console.log('Will remove...')
     this.classList.add('zoomOut')
     setTimeout(() => { this.remove() }, 500)
   }
@@ -207,12 +205,18 @@ export default class AppWindow extends window.HTMLElement {
    * Focus element
    */
   _focus () {
+    console.log('Focus window', this.tagName)
+
     // loop through all other elements to remove focused class... - not the most pretty way!
     let allElems = document.body.children
     for (let elem of allElems) {
       if (elem._contentElem) {
         if (elem.tagName == this.tagName) {
           elem.classList.add('focused')
+
+          if (elem === this.activeElement) {
+            console.log('SEEMS ACTIVE!')
+          }
         } else {
           elem.classList.remove('focused')
         }
@@ -224,8 +228,9 @@ export default class AppWindow extends window.HTMLElement {
    * Remove focus from element
    */
   _blur () {
-    console.log('Blur window')
+    console.log('Blur window', this.tagName)
     this.classList.remove('focused')
+    this.classList.add('blurred')
   }
 
   /**
@@ -233,14 +238,21 @@ export default class AppWindow extends window.HTMLElement {
    */
   connectedCallback () {
     console.log('Creating new window')
+    this.addEventListener('mousedown', (e) => console.log(' -> mousedown'))
+    this.addEventListener('mouseup', (e) => console.log(' -> mouseup'))
+    this.addEventListener('click', (e) => console.log(' -> click'))
+    this.addEventListener('focusin', (e) => console.log(' -> focusin'))
+    this.addEventListener('focus', (e) => console.log(' -> focus'))
+    this.addEventListener('blur', (e) => console.log(' -> blur'))
+    this.addEventListener('focusout', (e) => console.log(' -> focusout'))
+    this.addEventListener('blur', (e) => console.log(' -> blur'))
   }
 
   /**
    * Actions performed when element is removed
    */
   disconnectedCallback () {
-    // remove
-    storage.remove(this.tagName.toLowerCase())
+    // storage.remove(this.tagName.toLowerCase())
     console.log('Destroying window')
   }
 
@@ -267,8 +279,8 @@ export default class AppWindow extends window.HTMLElement {
     switch (name) {
       case 'title': this.setTitle(newValue); break
       case 'content': this._contentElem.textContent = newValue; break
-      case 'x': console.log('moveX'); this.style.left = newValue + 'px'; break
-      case 'y': console.log('moveY'); this.style.top = newValue + 'px'; break
+      case 'x': this.style.left = newValue + 'px'; break
+      case 'y': this.style.top = newValue + 'px'; break
       case 'width': this.style.width = newValue + 'px'; break
       case 'height': this.style.height = newValue + 'px'; break
     }
