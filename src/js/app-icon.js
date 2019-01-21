@@ -5,6 +5,7 @@ export default class AppIcon extends window.HTMLElement {
     super()
     let imgUrl = (this.hasAttribute('img')) ? this.getAttribute('img') : 'close'
     this.image = '/image/icons/' + imgUrl + '.png'
+    this.state = false
 
     const template = document.createElement('template')
     template.innerHTML = /* html */ `<img class="app-icon" src="${this.image}">`
@@ -13,6 +14,7 @@ export default class AppIcon extends window.HTMLElement {
     this.shadowRoot.appendChild(cssTemplate.content.cloneNode(true))
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this._imgElem = this.shadowRoot.querySelector('img')
+    this._imgElem.addEventListener('click', event => this.click(event))
   }
 
   setImage (img) {
@@ -20,6 +22,11 @@ export default class AppIcon extends window.HTMLElement {
 
     this.image = img
     this._imgElem.src = this.image
+  }
+
+  click () {
+    this.state = !(this.state)
+    console.log('Clicked icon!', this.state)
   }
 
   static get observedAttributes () {
