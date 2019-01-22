@@ -4,7 +4,7 @@ template.innerHTML = /* html */ `
     <h2></h2>
     <p></p>
     <input></input>
-    <button>Save</button>
+    <button>Go</button>
   </div>
 `
 
