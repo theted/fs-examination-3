@@ -88,8 +88,40 @@ export default class AppMoadal extends window.HTMLElement {
     this._inputElem.placeholder = placeholder
   }
 
+  /**
+   * Set placeholder of modal window
+   * @param {String} placeholder
+   */
+  setValue (value) {
+    this._inputElem.value = value
+  }
+
+  /**
+   * Set placeholder of modal window
+   * @param {String} placeholder
+   */
+  setType (type) {
+    this._inputElem.type = type
+  }
+
+  /**
+   * Set placeholder of modal window
+   * @param {String} placeholder
+   */
+  setPlaceholder (placeholder) {
+    this._inputElem.placeholder = placeholder
+  }
+
+  /**
+   * Set placeholder of modal window
+   * @param {String} placeholder
+   */
+  setMax (max) {
+    this._inputElem.max = max
+  }
+
   static get observedAttributes () {
-    return ['title', 'content', 'placeholder']
+    return ['title', 'content', 'placeholder', 'value', 'type', 'max']
   }
 
   attributeChangedCallback (name, oldValue, newValue) {
@@ -97,6 +129,9 @@ export default class AppMoadal extends window.HTMLElement {
       case 'title': this.setTitle(newValue); break
       case 'content': this.setContent(newValue); break
       case 'placeholder': this.setPlaceholder(newValue); break
+      case 'value': this.setValue(newValue); break
+      case 'type': this.setType(newValue); break
+      case 'max': this.setMax(newValue); break
     }
   }
 }
