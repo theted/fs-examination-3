@@ -252,7 +252,7 @@ export default class AppWindow extends window.HTMLElement {
    * Actions performed when element is removed
    */
   disconnectedCallback () {
-    // storage.remove(this.tagName.toLowerCase())
+    storage.remove(this.tagName.toLowerCase())
     console.log('Destroying window')
   }
 
