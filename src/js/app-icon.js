@@ -27,6 +27,14 @@ export default class AppIcon extends window.HTMLElement {
   click () {
     this.state = !(this.state)
     console.log('Clicked icon!', this.state)
+
+    // dispatch event that we can listen to
+    document.body.dispatchEvent(new CustomEvent('click-icon', {
+      bubbles: true,
+      detail: {
+        text: 'Hello'
+      }
+    }))
   }
 
   static get observedAttributes () {
