@@ -1,6 +1,7 @@
 import './app-wrap.js'
 import './app-icons.js'
 import './app-settings.js'
+import './about.js'
 import './chat.js'
 import './config.js'
 import './memory.js'
