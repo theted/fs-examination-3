@@ -40,7 +40,7 @@ export default class AppWindow extends window.HTMLElement {
     this.style.minHeight = this.height + 'px'
 
     // set initial position
-    if (!this.style.top) this.setStartPosition()
+    if (!this.style.top || !this.style.left) this.setStartPosition()
 
     // add start animation
     this.classList.add('zoomIn')
