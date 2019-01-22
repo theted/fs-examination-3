@@ -276,6 +276,10 @@ export default class AppWindow extends window.HTMLElement {
   attributeChangedCallback (name, oldValue, newValue) {
     console.log(`Change "${name}" from "${oldValue}" to "${newValue}"`)
 
+    if (this[name] !== newValue) {
+      this[name] = newValue
+    }
+
     switch (name) {
       case 'title': this.setTitle(newValue); break
       case 'content': this._contentElem.textContent = newValue; break
