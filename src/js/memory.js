@@ -13,7 +13,8 @@ export default class MemoryApp extends AppWindow {
     // options
     this.imgPath = '/image/memory/'
     this.defaultTile = this.imgPath + '0.png'
-    this.numTiles = 8
+    this.maxTiles = 8
+    this.numTiles = this.maxTiles
     this.timeout = 1000
 
     // elements
@@ -46,6 +47,12 @@ export default class MemoryApp extends AppWindow {
       if (event.key === 'Enter' || event.key === ' ') {
         this.clickTile(this.shadowRoot.activeElement)
       }
+    })
+
+    // setup event listener for modal submit, handle update of username
+    document.body.addEventListener('click-icon', event => {
+      console.log('ICON!', event.detail.text)
+      this.newGame() // new game dialog
     })
   }
 
@@ -194,6 +201,25 @@ export default class MemoryApp extends AppWindow {
       [array[i], array[j]] = [array[j], array[i]]
     }
     return array
+  }
+
+  /**
+   * Start new game, allowing the user to choose number of tiles
+   * through a modal window.
+   */
+  newGame () {
+    let modal = document.body.appendChild(document.createElement('app-modal', false))
+    modal.setAttribute('content', 'Rounds')
+    modal.setAttribute('placeholder', 'rounds')
+    modal.setAttribute('value', 8)
+    modal.setAttribute('max', 8)
+    modal.setAttribute('type', 'number')
+
+    // setup listener for modal
+    document.body.addEventListener('modal-update', event => {
+      this.numTiles = event.detail.text
+      this.start()
+    })
   }
 }
 
