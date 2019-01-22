@@ -17,6 +17,11 @@ export default class AppIcons extends window.HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this._ul = this.shadowRoot.querySelector('ul')
 
+    if (!storage.get('first-start')) {
+      storage.setJSON('about-app', { x: 200, y: 200 })
+      storage.set('first-start', true)
+    }
+
     for (let link of Config.availableApps) {
       let child = this._ul.appendChild(document.createElement('li'))
       let linkElem = child.appendChild(document.createElement('a'))
