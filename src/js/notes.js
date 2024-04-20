@@ -9,7 +9,7 @@ import * as _ from './helpers.js'
 const storage = new Storage()
 
 export default class NotesApp extends AppWindow {
-  constructor () {
+  constructor() {
     super()
 
     this.notes = ['Foo', 'Bar', 'Ny notering']
@@ -26,9 +26,9 @@ export default class NotesApp extends AppWindow {
     this._closeBtn = this.shadowRoot.querySelector('button[name="close"]')
     this._stateElem = this.shadowRoot.querySelector('span.state')
 
-    this._saveBtn.addEventListener('click', event => this._update())
-    this._closeBtn.addEventListener('click', event => this.displayNotes())
-    this._newBtn.addEventListener('click', event => this.newNote())
+    this._saveBtn.addEventListener('click', (event) => this._update())
+    this._closeBtn.addEventListener('click', (event) => this.displayNotes())
+    this._newBtn.addEventListener('click', (event) => this.newNote())
 
     // set window title & get current not from storage
     this.setTitle('Notes')
@@ -41,16 +41,16 @@ export default class NotesApp extends AppWindow {
     this.setupNotes()
   }
 
-  setupNotes () {
+  setupNotes() {
     let notnotes = document.createElement('ul')
     notnotes.classList.add('list')
 
-    this.notes.forEach(note => {
+    this.notes.forEach((note) => {
       let noteElem = document.createElement('li')
       let linkElem = document.createElement('a')
 
       linkElem.textContent = note
-      linkElem.addEventListener('click', event => {
+      linkElem.addEventListener('click', (event) => {
         this.selectNote(event.target.textContent)
       })
 
@@ -66,13 +66,13 @@ export default class NotesApp extends AppWindow {
     this._saveBtn.classList.add('hidden')
   }
 
-  selectNote (note) {
+  selectNote(note) {
     // get data
     let noteName = 'note-' + _.safify(note)
     let noteData = storage.get(noteName)
 
     // set data ....
-    console.log((noteData) || 'No data for ' + noteName)
+    console.log(noteData || 'No data for ' + noteName)
 
     if (!noteData) noteData = '(empty note)'
 
@@ -83,7 +83,7 @@ export default class NotesApp extends AppWindow {
     console.log('View note ->', note, _.safify(note), noteData)
   }
 
-  showNote (title = false, content = false, name = false) {
+  showNote(title = false, content = false, name = false) {
     if (!title) title = 'New note'
     if (!name) name = _.safify(title)
 
@@ -97,7 +97,7 @@ export default class NotesApp extends AppWindow {
     this._closeBtn.classList.remove('hidden')
   }
 
-  displayNotes () {
+  displayNotes() {
     this._notesList.classList.remove('hidden')
     this._noteElem.classList.add('hidden')
     this._newBtn.classList.remove('hidden')
@@ -105,7 +105,7 @@ export default class NotesApp extends AppWindow {
     this._closeBtn.classList.add('hidden')
   }
 
-  newNote () {
+  newNote() {
     // edit an new empty note
     this.showNote()
     this.setTitle('New note')
@@ -116,7 +116,7 @@ export default class NotesApp extends AppWindow {
   /**
    * Save note to storage on upt
    */
-  _update () {
+  _update() {
     // TODO: update list of notes if is new note..
 
     // TODO: require title and content fields to be non-empty

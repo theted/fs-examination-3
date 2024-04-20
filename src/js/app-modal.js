@@ -21,7 +21,7 @@ import cssTemplate from './app-modal.css.js'
  *
  */
 export default class AppMoadal extends window.HTMLElement {
-  constructor () {
+  constructor() {
     super()
 
     this.attachShadow({ mode: 'open' })
@@ -35,8 +35,10 @@ export default class AppMoadal extends window.HTMLElement {
 
     this._buttonElem.addEventListener('click', (event) => this.submit(), false)
 
-    this._inputElem.addEventListener('keyup', event => {
-      if (event.key === 'Enter') { this.submit() }
+    this._inputElem.addEventListener('keyup', (event) => {
+      if (event.key === 'Enter') {
+        this.submit()
+      }
     })
 
     // focus input element
@@ -46,19 +48,21 @@ export default class AppMoadal extends window.HTMLElement {
   /**
    * Handling of modal form submittion, including dispatching of `modal-update` event
    */
-  submit () {
+  submit() {
     let val = this._inputElem.value.trim()
 
     // prevent submission of empty values
     if (val.length < 1) return false
 
     // dispatch an `modal-update event which other modules may listen to
-    document.body.dispatchEvent(new CustomEvent('modal-update', {
-      bubbles: true,
-      detail: {
-        text: val
-      }
-    }))
+    document.body.dispatchEvent(
+      new CustomEvent('modal-update', {
+        bubbles: true,
+        detail: {
+          text: val
+        }
+      })
+    )
 
     // remove the element
     this.remove()
@@ -68,7 +72,7 @@ export default class AppMoadal extends window.HTMLElement {
    * Set title of modal window
    * @param {String} title
    */
-  setTitle (title) {
+  setTitle(title) {
     this._titleElem.textContent = title
   }
 
@@ -76,7 +80,7 @@ export default class AppMoadal extends window.HTMLElement {
    * Set content of modal window
    * @param {String} content
    */
-  setContent (content) {
+  setContent(content) {
     this._contentElem.textContent = content
   }
 
@@ -84,7 +88,7 @@ export default class AppMoadal extends window.HTMLElement {
    * Set placeholder of modal window
    * @param {String} placeholder
    */
-  setPlaceholder (placeholder) {
+  setPlaceholder(placeholder) {
     this._inputElem.placeholder = placeholder
   }
 
@@ -92,7 +96,7 @@ export default class AppMoadal extends window.HTMLElement {
    * Set placeholder of modal window
    * @param {String} placeholder
    */
-  setValue (value) {
+  setValue(value) {
     this._inputElem.value = value
   }
 
@@ -100,7 +104,7 @@ export default class AppMoadal extends window.HTMLElement {
    * Set placeholder of modal window
    * @param {String} placeholder
    */
-  setType (type) {
+  setType(type) {
     this._inputElem.type = type
   }
 
@@ -108,30 +112,34 @@ export default class AppMoadal extends window.HTMLElement {
    * Set placeholder of modal window
    * @param {String} placeholder
    */
-  setPlaceholder (placeholder) {
-    this._inputElem.placeholder = placeholder
-  }
-
-  /**
-   * Set placeholder of modal window
-   * @param {String} placeholder
-   */
-  setMax (max) {
+  setMax(max) {
     this._inputElem.max = max
   }
 
-  static get observedAttributes () {
+  static get observedAttributes() {
     return ['title', 'content', 'placeholder', 'value', 'type', 'max']
   }
 
-  attributeChangedCallback (name, oldValue, newValue) {
+  attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
-      case 'title': this.setTitle(newValue); break
-      case 'content': this.setContent(newValue); break
-      case 'placeholder': this.setPlaceholder(newValue); break
-      case 'value': this.setValue(newValue); break
-      case 'type': this.setType(newValue); break
-      case 'max': this.setMax(newValue); break
+      case 'title':
+        this.setTitle(newValue)
+        break
+      case 'content':
+        this.setContent(newValue)
+        break
+      case 'placeholder':
+        this.setPlaceholder(newValue)
+        break
+      case 'value':
+        this.setValue(newValue)
+        break
+      case 'type':
+        this.setType(newValue)
+        break
+      case 'max':
+        this.setMax(newValue)
+        break
     }
   }
 }

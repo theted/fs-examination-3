@@ -7,7 +7,7 @@ import cssTemplate from './memory.css.js'
 import htmlTemplate from './memory.html.js'
 
 export default class MemoryApp extends AppWindow {
-  constructor () {
+  constructor() {
     super()
 
     // options
@@ -33,7 +33,7 @@ export default class MemoryApp extends AppWindow {
   /**
    * Start / reset the Game
    */
-  start () {
+  start() {
     this.clicks = 0
     this.failedAttempts = 0
     this.remaining = this.numTiles
@@ -50,7 +50,7 @@ export default class MemoryApp extends AppWindow {
     })
 
     // setup event listener for modal submit, handle update of username
-    document.body.addEventListener('click-icon', event => {
+    document.body.addEventListener('click-icon', (event) => {
       console.log('ICON!', event.detail.text)
       this.newGame() // new game dialog
     })
@@ -59,7 +59,7 @@ export default class MemoryApp extends AppWindow {
   /**
    * (re)create tiles
    */
-  createTiles () {
+  createTiles() {
     this._tilesElem.innerHTML = '' // reset tiles element
     let tiles = [...Array(this.numTiles).keys()] // create array of n length
     tiles = tiles.concat(tiles) // duplicate array
@@ -71,7 +71,7 @@ export default class MemoryApp extends AppWindow {
    * Append a tile to the app window
    * @param {number} Number of tile
    */
-  _createTile (number) {
+  _createTile(number) {
     let tile = document.createElement('img')
     tile.src = this.defaultTile
     tile.setAttribute('image-number', number + 1)
@@ -84,7 +84,7 @@ export default class MemoryApp extends AppWindow {
    * Click handler for tiles
    * @param {Tile} Tile element
    */
-  clickTile (el) {
+  clickTile(el) {
     // prevent same elemnt from being clicked twice
     // TODO: fix double-click issue!
     if (this.clicks === 1 && this.clickedElements[0] === el) return false
@@ -110,10 +110,10 @@ export default class MemoryApp extends AppWindow {
    * Check if two tiles matchs
    * @param {Tiles[]} Array of tiles
    */
-  matchTiles (tiles) {
+  matchTiles(tiles) {
     let firstNum = tiles[0].getAttribute('image-number')
     let secondNumber = tiles[1].getAttribute('image-number')
-    let match = (firstNum === secondNumber)
+    let match = firstNum === secondNumber
     return match
   }
 
@@ -121,10 +121,12 @@ export default class MemoryApp extends AppWindow {
    * Sucessful match handling
    * @param {Tiles[]} tiles
    */
-  sucessfulMatch (tiles) {
+  sucessfulMatch(tiles) {
     tiles.forEach((tile) => {
       tile.classList.add('success')
-      setTimeout(() => { this.removeTile(tile) }, this.timeout)
+      setTimeout(() => {
+        this.removeTile(tile)
+      }, this.timeout)
     })
 
     --this.remaining
@@ -139,8 +141,10 @@ export default class MemoryApp extends AppWindow {
    * Failure match
    * @param {Tiles[]} tiles
    */
-  failureMatch (tiles) {
-    tiles.forEach((tile) => { this._setClassAndReset(tile, 'failure') })
+  failureMatch(tiles) {
+    tiles.forEach((tile) => {
+      this._setClassAndReset(tile, 'failure')
+    })
     ++this.failedAttempts
     this._failsElement.textContent = this.failedAttempts
   }
@@ -150,16 +154,18 @@ export default class MemoryApp extends AppWindow {
    * @param {Tile} tile
    * @param {string} className
    */
-  _setClassAndReset (tile, className) {
+  _setClassAndReset(tile, className) {
     tile.classList.add(className)
-    setTimeout(() => { this.resetTile(tile) }, this.timeout)
+    setTimeout(() => {
+      this.resetTile(tile)
+    }, this.timeout)
   }
 
   /**
    * Remove a tile from the game area
    * @param {Tile} tile
    */
-  removeTile (tile) {
+  removeTile(tile) {
     tile.src = '/image/pixel.png'
     tile.removeEventListener('click', this.clickTile, false)
     tile.setAttribute('tabindex', -1)
@@ -169,7 +175,7 @@ export default class MemoryApp extends AppWindow {
    * Reset a single tile
    * @param {Tile} tile
    */
-  resetTile (tile) {
+  resetTile(tile) {
     tile.src = this.defaultTile
     tile.classList.remove('success')
     tile.classList.remove('failure')
@@ -178,7 +184,7 @@ export default class MemoryApp extends AppWindow {
   /**
    * Stuff when game is completed
    */
-  gameCompleted () {
+  gameCompleted() {
     let ttl = document.createElement('h1')
     ttl.textContent = 'GAME COMPLETED!'
 
@@ -195,10 +201,10 @@ export default class MemoryApp extends AppWindow {
    * Randomize order of an array
    * @param {array} array
    */
-  _shuffle (array) {
+  _shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]]
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[array[i], array[j]] = [array[j], array[i]]
     }
     return array
   }
@@ -207,8 +213,10 @@ export default class MemoryApp extends AppWindow {
    * Start new game, allowing the user to choose number of tiles
    * through a modal window.
    */
-  newGame () {
-    let modal = document.body.appendChild(document.createElement('app-modal', false))
+  newGame() {
+    let modal = document.body.appendChild(
+      document.createElement('app-modal', false)
+    )
     modal.setAttribute('content', 'Rounds')
     modal.setAttribute('placeholder', 'rounds')
     modal.setAttribute('value', 8)
@@ -216,7 +224,7 @@ export default class MemoryApp extends AppWindow {
     modal.setAttribute('type', 'number')
 
     // setup listener for modal
-    document.body.addEventListener('modal-update', event => {
+    document.body.addEventListener('modal-update', (event) => {
       this.numTiles = event.detail.text
       this.start()
     })

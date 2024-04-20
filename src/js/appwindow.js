@@ -9,7 +9,7 @@ import Storage from './storage.js'
 const storage = new Storage()
 
 export default class AppWindow extends window.HTMLElement {
-  constructor () {
+  constructor() {
     super()
 
     // setup default properties
@@ -32,7 +32,10 @@ export default class AppWindow extends window.HTMLElement {
     this._closeElem = this.shadowRoot.querySelector('.close')
     this._moveElem = this.shadowRoot.querySelector('.move')
     this._iconElem = this.shadowRoot.querySelector('app-icon')
-    this._iconElem.setAttribute('img', '/image/icons/' + this.tagName.toLowerCase() + '.png')
+    this._iconElem.setAttribute(
+      'img',
+      '/image/icons/' + this.tagName.toLowerCase() + '.png'
+    )
     this._appIcon = this.shadowRoot.querySelector('app-icon')
 
     // set initial window dimensions
@@ -62,7 +65,7 @@ export default class AppWindow extends window.HTMLElement {
    * @param {number} x
    * @param {number} y
    */
-  setElementPosition (el, x, y) {
+  setElementPosition(el, x, y) {
     el.style.top = x + 'px'
     el.style.left = y + 'px'
     // el.x = x
@@ -74,16 +77,16 @@ export default class AppWindow extends window.HTMLElement {
   /**
    * Set start position
    */
-  setStartPosition () {
+  setStartPosition() {
     this.centerElem()
   }
 
   /**
    * Place window at center of screen
    */
-  centerElem () {
-    this.x = (window.innerWidth / 2) - (this.width / 2)
-    this.y = (window.innerHeight / 2) - (this.height / 2)
+  centerElem() {
+    this.x = window.innerWidth / 2 - this.width / 2
+    this.y = window.innerHeight / 2 - this.height / 2
     this.setElementPosition(this, this.x, this.y)
   }
 
@@ -91,14 +94,14 @@ export default class AppWindow extends window.HTMLElement {
    * Set height of element
    * @param {number} Height - in px
    */
-  setHeight (height) {
+  setHeight(height) {
     this.style.height = height + 'px'
   }
 
   /**
    * Setup drag events
    */
-  _setupDragEvents () {
+  _setupDragEvents() {
     this.offsetX = parseInt(this.style.left)
     this.offsetY = parseInt(this.style.top)
     this.addEventListener('mousedown', this._dragStart, false)
@@ -109,7 +112,7 @@ export default class AppWindow extends window.HTMLElement {
    * Setup event listeners on drag start
    * @param {Mouse Event} Mouse event
    */
-  _dragStart (e) {
+  _dragStart(e) {
     this.dragItem = this
     this._contentElem.classList.add('dragging')
     let [x, y] = this.getPosition(e)
@@ -125,7 +128,7 @@ export default class AppWindow extends window.HTMLElement {
    * Handle drag event update
    * @param {Mouse Event} Mouse event
    */
-  _dragUpdate (e) {
+  _dragUpdate(e) {
     e.preventDefault()
     let [x, y] = this.getPosition(e)
     this.x = parseInt(x - this.initialX + this.offsetX)
@@ -137,7 +140,7 @@ export default class AppWindow extends window.HTMLElement {
    * Stop drag event
    * @param {Mouse Event} Mouse event
    */
-  _dragEnd (e) {
+  _dragEnd(e) {
     this.offsetX = this.x
     this.offsetY = this.y
     this.removeEventListener('mousemove', this._dragUpdate, false)
@@ -150,8 +153,8 @@ export default class AppWindow extends window.HTMLElement {
    * Get position - support for both mouse & touch events
    * @param {Mouse Event} Mouse event
    */
-  getPosition (e) {
-    return (e.type === 'touchstart' || e.type === 'touchmove')
+  getPosition(e) {
+    return e.type === 'touchstart' || e.type === 'touchmove'
       ? [e.touches[0].clientX, e.touches[0].clientY]
       : [e.clientX, e.clientY]
   }
@@ -159,7 +162,7 @@ export default class AppWindow extends window.HTMLElement {
   /**
    * Save position of element
    */
-  savePosition () {
+  savePosition() {
     storage.setJSON(this.tagName.toLowerCase(), {
       x: this.x,
       y: this.y
@@ -172,7 +175,7 @@ export default class AppWindow extends window.HTMLElement {
    * @param {number} Y coordinates in pixels
    * @param {HTMLElement} HTML Element
    */
-  placeElem (x, y, el) {
+  placeElem(x, y, el) {
     el.style.left = x + 'px'
     el.style.top = y + 'px'
   }
@@ -181,7 +184,7 @@ export default class AppWindow extends window.HTMLElement {
    * Set the title of the window
    * @param {string} Window title
    */
-  setTitle (title) {
+  setTitle(title) {
     this._titleElem.textContent = title
   }
 
@@ -189,22 +192,24 @@ export default class AppWindow extends window.HTMLElement {
    * Set (HTML) content
    * @param {String} HTML content
    */
-  setContent (content) {
+  setContent(content) {
     this._contentElem.innerHTML = content
   }
 
   /**
    * Animate element destruction
    */
-  destroy () {
+  destroy() {
     this.classList.add('zoomOut')
-    setTimeout(() => { this.remove() }, 500)
+    setTimeout(() => {
+      this.remove()
+    }, 500)
   }
 
   /**
    * Focus element
    */
-  _focus () {
+  _focus() {
     console.log('Focus window', this.tagName)
 
     // loop through all other elements to remove focused class... - not the most pretty way!
@@ -227,7 +232,7 @@ export default class AppWindow extends window.HTMLElement {
   /**
    * Remove focus from element
    */
-  _blur () {
+  _blur() {
     console.log('Blur window', this.tagName)
     this.classList.remove('focused')
     this.classList.add('blurred')
@@ -236,7 +241,7 @@ export default class AppWindow extends window.HTMLElement {
   /**
    * Actions performed when element is created
    */
-  connectedCallback () {
+  connectedCallback() {
     console.log('Creating new window')
     this.addEventListener('mousedown', (e) => console.log(' -> mousedown'))
     this.addEventListener('mouseup', (e) => console.log(' -> mouseup'))
@@ -251,7 +256,7 @@ export default class AppWindow extends window.HTMLElement {
   /**
    * Actions performed when element is removed
    */
-  disconnectedCallback () {
+  disconnectedCallback() {
     storage.remove(this.tagName.toLowerCase())
     console.log('Destroying window')
   }
@@ -262,7 +267,7 @@ export default class AppWindow extends window.HTMLElement {
    * @static
    * @memberof AppWindow
    */
-  static get observedAttributes () {
+  static get observedAttributes() {
     return ['title', 'content', 'x', 'y', 'width', 'height']
   }
 
@@ -273,7 +278,7 @@ export default class AppWindow extends window.HTMLElement {
    * @param {String} newValue
    * @memberof AppWindow
    */
-  attributeChangedCallback (name, oldValue, newValue) {
+  attributeChangedCallback(name, oldValue, newValue) {
     console.log(`Change "${name}" from "${oldValue}" to "${newValue}"`)
 
     if (this[name] !== newValue) {
@@ -281,12 +286,24 @@ export default class AppWindow extends window.HTMLElement {
     }
 
     switch (name) {
-      case 'title': this.setTitle(newValue); break
-      case 'content': this._contentElem.textContent = newValue; break
-      case 'x': this.style.left = newValue + 'px'; break
-      case 'y': this.style.top = newValue + 'px'; break
-      case 'width': this.style.width = newValue + 'px'; break
-      case 'height': this.style.height = newValue + 'px'; break
+      case 'title':
+        this.setTitle(newValue)
+        break
+      case 'content':
+        this._contentElem.textContent = newValue
+        break
+      case 'x':
+        this.style.left = newValue + 'px'
+        break
+      case 'y':
+        this.style.top = newValue + 'px'
+        break
+      case 'width':
+        this.style.width = newValue + 'px'
+        break
+      case 'height':
+        this.style.height = newValue + 'px'
+        break
     }
   }
 }

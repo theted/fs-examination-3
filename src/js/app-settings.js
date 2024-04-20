@@ -7,7 +7,7 @@ import * as _ from './helpers.js'
 const storage = new Storage()
 
 export default class SettingsApp extends AppWindow {
-  constructor () {
+  constructor() {
     super()
     const _this = this
 
@@ -33,12 +33,12 @@ export default class SettingsApp extends AppWindow {
    * Setup tabs & click events
    * TODO: maybe move to parent AppWindow module?
    */
-  setupTabs () {
+  setupTabs() {
     this._tabsLinks.forEach((link) => {
       link.addEventListener('click', (event) => {
         event.preventDefault()
         let nAme = event.target.textContent.toLowerCase()
-        this._sections.forEach(section => {
+        this._sections.forEach((section) => {
           section.classList.add('hidden')
 
           if (section.id == nAme) {
@@ -49,7 +49,9 @@ export default class SettingsApp extends AppWindow {
     })
 
     // initially hide all tabs
-    this._sections.forEach(section => { section.classList.add('hidden') })
+    this._sections.forEach((section) => {
+      section.classList.add('hidden')
+    })
 
     // start at backgrounds tabs
     this._tabsLinks[2].click()
@@ -58,7 +60,7 @@ export default class SettingsApp extends AppWindow {
   /**
    * Create theme buttons & setup click events
    */
-  setupThemes () {
+  setupThemes() {
     // setup themes
     Config.availableThemes.forEach((theme) => {
       let themeElem = document.createElement('p')
@@ -73,7 +75,7 @@ export default class SettingsApp extends AppWindow {
   /**
    * Create background image elements and setup click events
    */
-  setupBackgrounds () {
+  setupBackgrounds() {
     // create image elements
     let htmlTemp = ''
 
@@ -86,7 +88,7 @@ export default class SettingsApp extends AppWindow {
     // setup click events for each imag
     let elements = this._contentElem.getElementsByTagName('img')
     for (let i = 0, len = elements.length; i < len; i++) {
-      elements[i].addEventListener('click', event => {
+      elements[i].addEventListener('click', (event) => {
         this.setBackgroundImage(event.target.src, document.body)
       })
     }
@@ -95,7 +97,7 @@ export default class SettingsApp extends AppWindow {
   /**
    * Setup options
    */
-  setupOptions () {
+  setupOptions() {
     for (let option in Config.availableOptions) {
       // TODO: use template?
       // TODO: set initial checked state based on existing config
@@ -108,10 +110,12 @@ export default class SettingsApp extends AppWindow {
 
       _.addTemplate(templateHtml, this._optionsElem)
 
-      let optionElem = this._optionsElem.querySelector('input[name="' + option + '"]')
+      let optionElem = this._optionsElem.querySelector(
+        'input[name="' + option + '"]'
+      )
 
       // save & publish value when input is clicked
-      optionElem.addEventListener('click', event => {
+      optionElem.addEventListener('click', (event) => {
         storage.publish('settings-' + option, event.target.checked)
       })
     }
@@ -122,7 +126,7 @@ export default class SettingsApp extends AppWindow {
    * @param {String} img URL
    * @memberof SettingsApp
    */
-  setBackgroundImage (img) {
+  setBackgroundImage(img) {
     _.setBackgroundImage(img, document.body)
     storage.set('settings-background', img)
   }
@@ -132,7 +136,7 @@ export default class SettingsApp extends AppWindow {
    * @param {String} theme
    * @memberof SettingsApp
    */
-  setTheme (theme) {
+  setTheme(theme) {
     document.body.className = theme
     storage.set('setting-theme', theme)
   }

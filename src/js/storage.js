@@ -4,7 +4,7 @@ export default class Storage {
    * @param {string} key
    * @returns {string} value
    */
-  get (key) {
+  get(key) {
     return window.localStorage.getItem(key)
   }
 
@@ -13,7 +13,7 @@ export default class Storage {
    * @param {string} key
    * @returns {JSON} data
    */
-  getJSON (key) {
+  getJSON(key) {
     return JSON.parse(this.get(key))
   }
 
@@ -22,7 +22,7 @@ export default class Storage {
    * @param {string} key
    * @param {string} val
    */
-  set (key, val) {
+  set(key, val) {
     window.localStorage.setItem(key, val)
   }
 
@@ -31,7 +31,7 @@ export default class Storage {
    * @param {String} key
    * @param {Object} data
    */
-  setJSON (key, val) {
+  setJSON(key, val) {
     return this.set(key, JSON.stringify(val))
   }
 
@@ -39,7 +39,7 @@ export default class Storage {
    * Remove key from localStorage
    * @param {string} key
    */
-  remove (key) {
+  remove(key) {
     window.localStorage.removeItem(key)
   }
 
@@ -47,7 +47,7 @@ export default class Storage {
    * List all keys
    * @returns {string[]} List of keys
    */
-  keys () {
+  keys() {
     var keys = []
     for (var i = 0, len = window.localStorage.length; i < len; ++i) {
       keys.push(window.localStorage.key(i))
@@ -55,7 +55,7 @@ export default class Storage {
     return keys
   }
 
-  debug () {
+  debug() {
     var storageKeys = this.keys()
     for (var i = 0, len = storageKeys.length; i < len; i++) {
       console.log(storageKeys[i], '->', this.get(storageKeys[i]))
@@ -63,22 +63,24 @@ export default class Storage {
   }
 
   /**
-  * Dispatch an update event
-  * @param {String} key
-  * @param {*} value
-  * @param {String} event name (default: `storage-update`)
-  * @param {HTML Element} Target (default: document.body)
-  */
-  publish (key, value, eventName = 'storage-update', target = document.body) {
+   * Dispatch an update event
+   * @param {String} key
+   * @param {*} value
+   * @param {String} event name (default: `storage-update`)
+   * @param {HTML Element} Target (default: document.body)
+   */
+  publish(key, value, eventName = 'storage-update', target = document.body) {
     this.set(key, value)
 
-    target.dispatchEvent(new window.CustomEvent(eventName, {
-      bubbles: true,
-      detail: {
-        key: key,
-        value: value
-      }
-    }))
+    target.dispatchEvent(
+      new window.CustomEvent(eventName, {
+        bubbles: true,
+        detail: {
+          key: key,
+          value: value
+        }
+      })
+    )
   }
 
   /**
@@ -87,8 +89,13 @@ export default class Storage {
    * @param {*} callback
    * @memberof Storage
    */
-  subscribe (callback, key = false, channel = 'storage-update', target = document.body) {
-    target.addEventListener(channel, event => {
+  subscribe(
+    callback,
+    key = false,
+    channel = 'storage-update',
+    target = document.body
+  ) {
+    target.addEventListener(channel, (event) => {
       callback(event.detail)
     })
   }

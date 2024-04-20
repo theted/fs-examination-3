@@ -9,7 +9,7 @@ import Config from './config.js'
 const storage = new Storage()
 
 export default class AppWrap extends window.HTMLElement {
-  constructor () {
+  constructor() {
     super()
     const template = document.createElement('template')
     template.innerHTML = /* html */ `
@@ -25,13 +25,14 @@ export default class AppWrap extends window.HTMLElement {
   /**
    * Actions to perform when application starts
    */
-  init () {
+  init() {
     // set theme
     let theme = storage.get('setting-theme') || Config.defaults.theme
     document.body.className = theme
 
     // set background image
-    this.background = storage.get('settings-background') || Config.defaults.background
+    this.background =
+      storage.get('settings-background') || Config.defaults.background
     _.setBackgroundImage(this.background, document.body)
   }
 }

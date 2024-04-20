@@ -1,5 +1,5 @@
 const template = document.createElement('template')
-template.innerHTML = /* html */`
+template.innerHTML = /* html */ `
 
   <header id="tabs">
     <a href="#global">Global</a>

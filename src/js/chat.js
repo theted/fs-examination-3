@@ -12,7 +12,7 @@ import htmlTemplate from './chat.html.js'
 const storage = new Storage()
 
 export default class ChatApp extends AppWindow {
-  constructor () {
+  constructor() {
     super()
 
     // extend content for AppWindow using external template
@@ -55,7 +55,7 @@ export default class ChatApp extends AppWindow {
    * Set an username for the chat
    * @param {String} username
    */
-  setUsername (username) {
+  setUsername(username) {
     this.username = username
     storage.set('username', username) // save in storage
   }
@@ -65,16 +65,18 @@ export default class ChatApp extends AppWindow {
    * @param {string} message
    * @param {string} username
    */
-  sendMessage (message, username) {
+  sendMessage(message, username) {
     if (!message.length) return false
 
-    this.connection.send(JSON.stringify({
-      type: 'message',
-      'data': message,
-      'username': username,
-      'channel': Config.defaultChatChannel,
-      'key': Config.apiKey
-    }))
+    this.connection.send(
+      JSON.stringify({
+        type: 'message',
+        data: message,
+        username: username,
+        channel: Config.defaultChatChannel,
+        key: Config.apiKey
+      })
+    )
 
     this._messageElem.value = '' // clear message box after message has been sent
   }
@@ -85,7 +87,7 @@ export default class ChatApp extends AppWindow {
    * @param {string} Usernam
    * @param {string} Timestamp
    */
-  displayMessage (message, user, time) {
+  displayMessage(message, user, time) {
     let msg = _.addTo(this._messages, 'p', false, 'message')
     let msgUser = _.addTo(msg, 'span', user, 'user')
 
@@ -104,8 +106,10 @@ export default class ChatApp extends AppWindow {
    * @param {string} message
    * @param {string} user
    */
-  addMessage (message, user, time) {
-    if (!time || typeof time === undefined) { time = _.timeStamp() }
+  addMessage(message, user, time) {
+    if (!time) {
+      time = _.timeStamp()
+    }
     this.displayMessage(message, user, time)
 
     // save current list of messages in localStorage
@@ -124,7 +128,7 @@ export default class ChatApp extends AppWindow {
    * @returns {String} sanitized string
    * @memberof ChatApp
    */
-  sanitize (string) {
+  sanitize(string) {
     const map = {
       '&': '&amp;',
       '<': '&lt;',
@@ -133,11 +137,11 @@ export default class ChatApp extends AppWindow {
       "'": '&#x27;',
       '/': '&#x2F;'
     }
-    const reg = /[&<>"'/]/ig
-    return string.replace(reg, (match) => (map[match]))
+    const reg = /[&<>"'/]/gi
+    return string.replace(reg, (match) => map[match])
   }
 
-  saveMessages () {
+  saveMessages() {
     storage.set('messages', JSON.stringify(this.messages))
   }
 
@@ -145,7 +149,7 @@ export default class ChatApp extends AppWindow {
    * Setup the connection to the chat server,
    * as well as bindind of related events
    */
-  setup () {
+  setup() {
     let _this = this
 
     // require an username for the chat
@@ -166,7 +170,9 @@ export default class ChatApp extends AppWindow {
      */
     this.connection.onmessage = function (e) {
       let res = JSON.parse(e.data)
-      if (res.type === 'message') { _this.addMessage(res.data, res.username) }
+      if (res.type === 'message') {
+        _this.addMessage(res.data, res.username)
+      }
     }
 
     /**
@@ -181,29 +187,31 @@ export default class ChatApp extends AppWindow {
    * Require an username from the user. Checks for existing username in storage,
    * opens a modal asking for an username if no previous username exists.
    */
-  requireUsername () {
+  requireUsername() {
     let prevUsername = storage.get('username')
 
     if (prevUsername) {
       this.setUsername(prevUsername)
     } else {
       // add modal to document
-      let modal = document.body.appendChild(document.createElement('app-modal', false))
+      let modal = document.body.appendChild(
+        document.createElement('app-modal', false)
+      )
       modal.setAttribute('content', 'Please provide an username for the chat')
       modal.setAttribute('placeholder', 'username')
 
       // setup event listener for modal submit, handle update of username
-      document.body.addEventListener('modal-update', event => {
+      document.body.addEventListener('modal-update', (event) => {
         this.setUsername(event.detail.text)
       })
     }
   }
 
-  connectedCallback () {
+  connectedCallback() {
     console.log('Hi fom chat')
   }
 
-  disconnectedCallback () {
+  disconnectedCallback() {
     this.connection.close()
     console.log('Bye from chat')
   }
