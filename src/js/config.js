@@ -13,7 +13,7 @@ export default {
   defaultChatChannel: 'my, not so secret, channel',
   maxChatMessages: 100,
   numBackgroundImages: 12,
-  animationDuration: 500,
+  animationDuration: 180,
   // only offer the chat when there is a server to talk to
   availableApps: [
     'memory',
@@ -24,7 +24,7 @@ export default {
   ].filter(Boolean),
   availableThemes: ['light', 'dark', 'minimal', 'weird'],
   availableOptions: {
-    autoHide: 'Auto-hide navigation'
+    autoHide: 'Hide the dock until you point at it'
   },
   defaults: {
     theme: 'light',

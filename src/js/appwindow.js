@@ -6,21 +6,21 @@
  * Position a window with its `x` and `y` attributes (in px).
  * TODO: add support for resizing windows
  */
-import cssTemplate from './appwindow.css.js'
+import windowCss from '../css/components/window.css?inline'
 import htmlTemplate from './appwindow.html.js'
 import './app-icon.js'
 import storage from './storage.js'
 import Config from './config.js'
+import { stylesheet } from './helpers.js'
+import { controls } from './styles.js'
+
+const windowSheet = stylesheet(windowCss)
 
 // open windows in stacking order, top-most last
 const stack = []
 
 export default class AppWindow extends HTMLElement {
   static observedAttributes = ['x', 'y']
-
-  // default window size: minimum size, and used to center new windows
-  width = 400
-  height = 160
 
   #x = 0
   #y = 0
@@ -33,14 +33,12 @@ export default class AppWindow extends HTMLElement {
     super()
 
     this.attachShadow({ mode: 'open' })
-    this.shadowRoot.append(
-      htmlTemplate.content.cloneNode(true),
-      cssTemplate.content.cloneNode(true)
-    )
+    this.shadowRoot.adoptedStyleSheets = [controls, windowSheet]
+    this.shadowRoot.append(htmlTemplate.content.cloneNode(true))
 
     this._contentElem = this.shadowRoot.querySelector('.content')
     this._iconElem = this.shadowRoot.querySelector('.icon app-icon')
-    this._iconElem.setAttribute('img', `/image/icons/${this.localName}.png`)
+    this._iconElem.setAttribute('img', this.localName)
     this.#titleElem = this.shadowRoot.querySelector('.title h3')
     this.#dragHandle = this.shadowRoot.querySelector('.title')
 
@@ -57,6 +55,17 @@ export default class AppWindow extends HTMLElement {
    */
   setTitle(title) {
     this.#titleElem.textContent = title
+  }
+
+  /**
+   * Add styles for a subclass's content
+   * @param {CSSStyleSheet} sheet
+   */
+  _addStyles(sheet) {
+    this.shadowRoot.adoptedStyleSheets = [
+      ...this.shadowRoot.adoptedStyleSheets,
+      sheet
+    ]
   }
 
   /**
@@ -89,9 +98,6 @@ export default class AppWindow extends HTMLElement {
     if (this.#initialized) return
     this.#initialized = true
 
-    this.style.minWidth = `${this.width}px`
-    this.style.minHeight = `${this.height}px`
-
     // windows opened without a position start centered
     if (!this.style.left || !this.style.top) this.#center()
     // pull restored windows back on screen if needed
@@ -116,8 +122,8 @@ export default class AppWindow extends HTMLElement {
 
   #center() {
     this.moveTo(
-      Math.round(window.innerWidth / 2 - this.width / 2),
-      Math.round(window.innerHeight / 2 - this.height / 2)
+      Math.round((window.innerWidth - this.offsetWidth) / 2),
+      Math.round((window.innerHeight - this.offsetHeight) / 2)
     )
   }
 
@@ -159,7 +165,8 @@ export default class AppWindow extends HTMLElement {
       }
       // keep receiving this pointer's events even when it leaves the window
       handle.setPointerCapture(event.pointerId)
-      this._contentElem.classList.add('dragging')
+      this.classList.add('held')
+      this.#grip(event)
     })
 
     handle.addEventListener('pointermove', (event) => {
@@ -172,17 +179,27 @@ export default class AppWindow extends HTMLElement {
           Math.round(event.clientY - offsetY)
         )
       )
+      this.#grip(event)
     })
 
     const dragEnd = (event) => {
       if (event.pointerId !== this.#drag?.pointerId) return
 
       this.#drag = null
-      this._contentElem.classList.remove('dragging')
+      this.classList.remove('held')
       this.#savePosition()
     }
     handle.addEventListener('pointerup', dragEnd)
     handle.addEventListener('pointercancel', dragEnd)
+  }
+
+  /**
+   * Where the window is held, for the grip light (see window.css)
+   * @param {PointerEvent} event
+   */
+  #grip(event) {
+    this.style.setProperty('--grip-x', `${event.clientX - this.offsetLeft}px`)
+    this.style.setProperty('--grip-y', `${event.clientY - this.offsetTop}px`)
   }
 
   /**
@@ -196,7 +213,7 @@ export default class AppWindow extends HTMLElement {
     const visible = 140 // px of the window kept on screen horizontally
     const minX = visible - this.offsetWidth
     const maxX = window.innerWidth - visible
-    const maxY = window.innerHeight - 40
+    const maxY = window.innerHeight - 120 // keep the title bar above the dock
 
     return [Math.max(minX, Math.min(x, maxX)), Math.max(0, Math.min(y, maxY))]
   }

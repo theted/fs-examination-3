@@ -1,0 +1,60 @@
+/**
+ * Modal prompt, shown in the browser's top layer above every window
+ */
+:host {
+  display: contents;
+}
+
+dialog {
+  width: min(360px, calc(100vw - 32px));
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-window);
+  color: var(--ink);
+  background: var(--pane-dialog, var(--pane-content));
+  -webkit-backdrop-filter: blur(var(--pane-blur)) saturate(170%);
+  backdrop-filter: blur(var(--pane-blur)) saturate(170%);
+  box-shadow:
+    var(--shadow-held),
+    inset 0 1px 0 var(--rim),
+    inset 0 0 0 1px var(--rim-low);
+}
+
+dialog[open] {
+  animation: zoomIn var(--duration) var(--ease-out);
+}
+
+dialog::backdrop {
+  background: var(--scrim, rgb(8 12 24 / 0.38));
+}
+
+form {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+
+h2 {
+  font-size: var(--text-title);
+  font-weight: 650;
+  font-stretch: var(--stretch-title);
+}
+
+h2:empty {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+}

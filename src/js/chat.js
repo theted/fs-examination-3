@@ -1,13 +1,15 @@
 /**
  * Chat module. Hidden from the dock while Config.chatHost is null.
  */
+import chatCss from '../css/components/chat.css?inline'
 import AppWindow from './appwindow.js'
 import AppModal from './app-modal.js'
 import storage from './storage.js'
 import Config from './config.js'
-import { addTo, timeStamp } from './helpers.js'
-import cssTemplate from './chat.css.js'
+import { addTo, stylesheet, timeStamp } from './helpers.js'
 import htmlTemplate from './chat.html.js'
+
+const sheet = stylesheet(chatCss)
 
 export default class ChatApp extends AppWindow {
   #connection = null
@@ -19,10 +21,8 @@ export default class ChatApp extends AppWindow {
   constructor() {
     super()
 
-    this._contentElem.append(
-      htmlTemplate.content.cloneNode(true),
-      cssTemplate.content.cloneNode(true)
-    )
+    this._addStyles(sheet)
+    this._contentElem.append(htmlTemplate.content.cloneNode(true))
     this.#messagesElem = this.shadowRoot.querySelector('.chat-messages')
     this.#input = this.shadowRoot.querySelector('textarea')
     this.setTitle('Live chat')
@@ -86,8 +86,9 @@ export default class ChatApp extends AppWindow {
     this.#username =
       storage.get('username') ??
       (await AppModal.prompt({
-        content: 'Please provide an username for the chat',
-        placeholder: 'username'
+        content: 'Pick a username for the chat',
+        placeholder: 'Username',
+        action: 'Save'
       }))
 
     if (this.#username) storage.set('username', this.#username)

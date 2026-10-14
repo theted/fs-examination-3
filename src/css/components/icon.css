@@ -1,0 +1,18 @@
+/**
+ * Icon: an SVG used as a mask, painted in the current text color
+ */
+:host {
+  display: inline-block;
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.glyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: currentColor;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}

@@ -1,15 +1,22 @@
 /**
  * Memory game module
  */
+import memoryCss from '../css/components/memory.css?inline'
 import AppWindow from './appwindow.js'
 import AppModal from './app-modal.js'
-import cssTemplate from './memory.css.js'
 import htmlTemplate from './memory.html.js'
+import { stylesheet, template } from './helpers.js'
+
+const sheet = stylesheet(memoryCss)
 
 const imgPath = '/image/memory/'
 const hiddenTile = `${imgPath}0.png`
 const maxPairs = 8
 const revealTime = 1000 // ms a turned pair stays visible
+
+/** e.g. plural(1, 'pair') -> '1 pair', plural(3, 'guess', 'guesses') -> '3 guesses' */
+const plural = (count, one, many = `${one}s`) =>
+  `${count} ${count === 1 ? one : many}`
 
 /**
  * Randomize the order of an array, in place (Fisher-Yates)
@@ -25,6 +32,7 @@ const shuffle = (array) => {
 }
 
 export default class MemoryApp extends AppWindow {
+  #game = 0 // increases with every new game, so old timers can tell
   #pairs = maxPairs // pairs in a game
   #remaining = 0 // pairs left to find
   #attempts = 0
@@ -39,10 +47,8 @@ export default class MemoryApp extends AppWindow {
   constructor() {
     super()
 
-    this._contentElem.append(
-      cssTemplate.content.cloneNode(true),
-      htmlTemplate.content.cloneNode(true)
-    )
+    this._addStyles(sheet)
+    this._contentElem.append(htmlTemplate.content.cloneNode(true))
     this.#tilesElem = this._contentElem.querySelector('.tiles')
     this.#scoreElem = this._contentElem.querySelector('#score')
     this.#failsElem = this._contentElem.querySelector('#fails')
@@ -63,7 +69,10 @@ export default class MemoryApp extends AppWindow {
       }
     })
 
-    // the window's own icon starts a new game
+    // the New game button, or the window's own icon, starts a new game
+    this._contentElem
+      .querySelector('.new-game')
+      .addEventListener('click', () => this.newGame())
     this._iconElem.addEventListener('click', () => this.newGame())
 
     this.setTitle('Memory game')
@@ -74,6 +83,7 @@ export default class MemoryApp extends AppWindow {
    * Start (or restart) the game
    */
   start() {
+    this.#game++
     this.#remaining = this.#pairs
     this.#attempts = 0
     this.#fails = 0
@@ -88,8 +98,9 @@ export default class MemoryApp extends AppWindow {
    */
   async newGame() {
     const answer = await AppModal.prompt({
-      content: 'Rounds',
-      placeholder: 'rounds',
+      title: 'New game',
+      content: `How many pairs? (1–${maxPairs})`,
+      action: 'Start',
       value: this.#pairs,
       type: 'number',
       min: 1,
@@ -132,6 +143,7 @@ export default class MemoryApp extends AppWindow {
     }
 
     tile.src = `${imgPath}${tile.dataset.image}.png`
+    tile.classList.add('face-up')
     this.#turned.push(tile)
     if (this.#turned.length < 2) return
 
@@ -147,13 +159,16 @@ export default class MemoryApp extends AppWindow {
   #match(pair) {
     for (const tile of pair) {
       tile.classList.add('matched', 'success')
-      setTimeout(() => {
-        tile.src = '/image/pixel.png'
-        tile.tabIndex = -1
-      }, revealTime)
+      tile.tabIndex = -1
     }
 
-    if (--this.#remaining === 0) this.#gameCompleted()
+    this.#remaining--
+    this.#later(() => {
+      for (const tile of pair) {
+        tile.classList.replace('success', 'cleared')
+      }
+      if (this.#remaining === 0) this.#gameCompleted()
+    })
   }
 
   #miss(pair) {
@@ -162,35 +177,48 @@ export default class MemoryApp extends AppWindow {
     // show the wrong pair for a moment before turning it back
     this.#locked = true
     pair.forEach((tile) => tile.classList.add('failure'))
-    setTimeout(() => {
+    this.#later(() => {
       for (const tile of pair) {
         tile.src = hiddenTile
-        tile.classList.remove('failure')
+        tile.classList.remove('failure', 'face-up')
       }
       this.#locked = false
+    })
+  }
+
+  /**
+   * Run after the reveal time, unless a new game has started by then
+   * @param {Function} callback
+   */
+  #later(callback) {
+    const game = this.#game
+    setTimeout(() => {
+      if (game === this.#game) callback()
     }, revealTime)
   }
 
   #updateScore() {
     const matches = this.#attempts - this.#fails
-    const accuracy = this.#attempts
-      ? Math.round((matches / this.#attempts) * 100)
-      : 0
-
     this.#scoreElem.textContent = this.#remaining
     this.#failsElem.textContent = this.#fails
-    this.#accuracyElem.textContent = `${accuracy} %`
+    this.#accuracyElem.textContent = this.#attempts
+      ? `${Math.round((matches / this.#attempts) * 100)} %`
+      : '–'
   }
 
   #gameCompleted() {
-    const title = document.createElement('h1')
-    title.textContent = 'GAME COMPLETED!'
-
-    const restart = document.createElement('button')
-    restart.textContent = 'Restart'
-    restart.addEventListener('click', () => this.start())
-
-    this.#tilesElem.replaceChildren(title, restart)
+    this.#tilesElem.replaceChildren(
+      template(/* html */ `
+        <div class="done">
+          <h1>All pairs found</h1>
+          <p>${plural(this.#pairs, 'pair')} in ${plural(this.#attempts, 'guess', 'guesses')}</p>
+          <button class="button primary" type="button">Play again</button>
+        </div>
+      `).content
+    )
+    this.#tilesElem
+      .querySelector('button')
+      .addEventListener('click', () => this.start())
   }
 }
 

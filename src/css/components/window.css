@@ -1,0 +1,156 @@
+/**
+ * App window: a frosted pane. Held windows lift, and their rim lights up
+ * where the pointer (or finger) grips the title bar: --grip-x / --grip-y.
+ */
+:host {
+  --window-width: 400px;
+
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--window-width), calc(100vw - 16px));
+  min-height: 160px;
+  max-height: calc(100dvh - 24px);
+  color: var(--ink);
+  background: var(--pane);
+  -webkit-backdrop-filter: blur(var(--pane-blur)) saturate(170%);
+  backdrop-filter: blur(var(--pane-blur)) saturate(170%);
+  border-radius: var(--radius-window);
+  box-shadow: var(--shadow-window);
+  transition:
+    box-shadow var(--duration),
+    scale var(--duration) var(--ease-out);
+}
+
+/* the rim: brighter along the top edge, like light falling on glass */
+:host::after,
+:host::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+:host::after {
+  background: var(--rim-fill, linear-gradient(var(--rim), var(--rim-low) 45%));
+}
+
+/* the grip light */
+:host::before {
+  z-index: 2;
+  padding: 2.5px;
+  background: radial-gradient(
+    circle 340px at var(--grip-x, 50%) var(--grip-y, 0px),
+    var(--signal) 10%,
+    transparent
+  );
+  opacity: 0;
+  transition: opacity var(--duration);
+}
+
+:host(.held) {
+  scale: 1.012;
+  box-shadow: var(--shadow-held);
+}
+
+:host(.held)::before {
+  opacity: 1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: var(--header-min);
+  padding: calc((var(--header-min) - var(--header-button)) / 2);
+  border-radius: var(--radius-window) var(--radius-window) 0 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+:host(.held) .header {
+  background: radial-gradient(
+    circle 220px at var(--grip-x, 50%) var(--grip-y, 0px),
+    color-mix(in srgb, var(--signal) 34%, transparent),
+    transparent
+  );
+}
+
+.icon,
+.close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--header-button);
+  height: var(--header-button);
+  border-radius: 50%;
+  color: var(--ink-soft);
+}
+
+.close:hover {
+  color: var(--ink);
+  background: var(--button-hover);
+}
+
+/* the title is the drag handle; no browser panning or zooming on it */
+.title {
+  flex: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 6px;
+  cursor: grab;
+  touch-action: none;
+}
+
+:host(.held) .title {
+  cursor: grabbing;
+}
+
+h3 {
+  overflow: hidden;
+  font-size: var(--text-title);
+  font-weight: 620;
+  font-stretch: var(--stretch-title);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  visibility: var(--title-visibility, visible);
+}
+
+:host(:not(.focused)) h3 {
+  color: var(--ink-soft);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  background: var(--pane-content);
+  border-radius: 0 0 var(--radius-window) var(--radius-window);
+}
+
+@media (pointer: coarse) {
+  .header {
+    min-height: max(var(--header-min), 56px);
+  }
+
+  .icon,
+  .close {
+    width: 44px;
+    height: 44px;
+  }
+}
