@@ -1,23 +1,13 @@
 import { template } from './helpers.js'
 
 export default template(/* html */ `
+  <nav id="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="backgrounds">Background</button>
+    <button type="button" role="tab" data-tab="themes">Theme</button>
+    <button type="button" role="tab" data-tab="options">Options</button>
+  </nav>
 
-  <header id="tabs">
-    <a href="#themes">Themes</a>
-    <a href="#backgrounds">Backgrounds</a>
-    <a href="#options">Options</a>
-  </header>
-
-  <section id="themes" class="theme">
-    <h3>Theme</h3>
-  </section>
-
-  <section id="backgrounds" class="images">
-    <h3>Background image</h3>
-  </section>
-
-  <section id="options">
-    <h3>Options</h3>
-  </section>
-
+  <section id="backgrounds" role="tabpanel" aria-label="Background"></section>
+  <section id="themes" role="tabpanel" aria-label="Theme"></section>
+  <section id="options" role="tabpanel" aria-label="Options"></section>
 `)

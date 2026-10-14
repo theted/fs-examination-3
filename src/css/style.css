@@ -1,15 +1,143 @@
+/**
+ * Global styles and design tokens.
+ *
+ * Windows are frosted panes over the wallpaper, like slides on a light table.
+ * Themes only set custom properties: these inherit into every component's
+ * shadow DOM, so components never need to know which theme is active.
+ */
+@import '@fontsource-variable/mona-sans/wdth.css';
+
+:root {
+  color-scheme: light;
+
+  --font-ui:
+    'Mona Sans Variable', 'Segoe UI Variable Text', system-ui, sans-serif;
+  --stretch-title: 112%;
+
+  /* type scale */
+  --text-small: 0.8125rem;
+  --text-body: 0.9375rem;
+  --text-title: 1.0625rem;
+  --text-display: 1.5rem;
+
+  /* colors */
+  --ink: #151a24;
+  --ink-soft: #566074;
+  --pane: rgb(244 247 251 / 0.72);
+  --pane-content: rgb(250 251 253 / 0.82);
+  --pane-dialog: rgb(250 251 253 / 0.94);
+  --pane-blur: 28px;
+  --header-min: 48px;
+  --header-button: 36px;
+  --rim: rgb(255 255 255 / 0.75);
+  --rim-low: rgb(255 255 255 / 0.18);
+  --hairline: rgb(21 26 36 / 0.1);
+  --field: rgb(255 255 255 / 0.72);
+  --button: rgb(21 26 36 / 0.06);
+  --button-hover: rgb(21 26 36 / 0.11);
+  --primary: #151a24;
+  --on-primary: #f4f7fb;
+  --link: #0a6aa1;
+  --signal: #39cfff; /* the light of a touch, and keyboard focus */
+  --hit: #1f9d5c;
+  --miss: #e0454b;
+  --scrim: rgb(8 12 24 / 0.38);
+
+  /* depth */
+  --shadow-window:
+    0 18px 50px -14px rgb(8 12 24 / 0.5), 0 2px 6px rgb(8 12 24 / 0.16);
+  --shadow-held:
+    0 36px 80px -18px rgb(8 12 24 / 0.62), 0 6px 16px rgb(8 12 24 / 0.2);
+
+  /* shape and motion */
+  --radius-window: 16px;
+  --radius-control: 10px;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration: 180ms;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ink: #eef1f7;
+  --ink-soft: #9ba5b9;
+  --pane: rgb(18 23 35 / 0.52);
+  --pane-content: rgb(14 18 28 / 0.72);
+  --pane-dialog: rgb(20 25 37 / 0.94);
+  --rim: rgb(255 255 255 / 0.3);
+  --rim-low: rgb(255 255 255 / 0.06);
+  --hairline: rgb(255 255 255 / 0.1);
+  --field: rgb(255 255 255 / 0.07);
+  --button: rgb(255 255 255 / 0.08);
+  --button-hover: rgb(255 255 255 / 0.14);
+  --primary: #eef1f7;
+  --on-primary: #121723;
+  --link: #7fd4ff;
+  --hit: #3ccf84;
+  --miss: #ff6b70;
+}
+
+/* clear panes, no titles, no shadows */
+:root[data-theme='minimal'] {
+  --pane: rgb(244 247 251 / 0.18);
+  --pane-content: rgb(250 251 253 / 0.84);
+  --pane-blur: 14px;
+  --header-min: 34px;
+  --header-button: 26px;
+  --rim: rgb(255 255 255 / 0.55);
+  --shadow-window: none;
+  --shadow-held: 0 0 0 1px rgb(255 255 255 / 0.4);
+  --title-visibility: hidden;
+}
+
+/* violet glass with an oil-slick rim */
+:root[data-theme='weird'] {
+  color-scheme: dark;
+  --ink: #fbf3ff;
+  --ink-soft: #d6bff0;
+  --pane: rgb(76 29 122 / 0.5);
+  --pane-content: rgb(46 14 82 / 0.66);
+  --pane-dialog: rgb(52 18 92 / 0.94);
+  --rim: rgb(255 255 255 / 0.4);
+  --rim-low: rgb(255 120 220 / 0.25);
+  --hairline: rgb(255 255 255 / 0.14);
+  --field: rgb(255 255 255 / 0.1);
+  --button: rgb(255 255 255 / 0.1);
+  --button-hover: rgb(255 255 255 / 0.18);
+  --primary: #ffd84d;
+  --on-primary: #2a0a4a;
+  --link: #ffd84d;
+  --signal: #ff5fd2;
+  --hit: #7dffb3;
+  --miss: #ff8a5c;
+  --rim-fill: conic-gradient(
+    from 200deg,
+    #ff7ad9,
+    #ffd84d,
+    #7dffb3,
+    #6ad5ff,
+    #b18cff,
+    #ff7ad9
+  );
+}
+
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  font-family: 'Helvetica Neue', Helvetica, arial, sans-serif;
   height: 100vh;
   overflow: hidden;
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  line-height: 1.45;
+  color: var(--ink);
+  background-color: #0d1220;
   background-size: cover;
-  background-position: fixed;
-  transition: background 400ms linear;
+  background-position: center;
+  transition: background-image 400ms linear;
+  -webkit-font-smoothing: antialiased;
 }
 
 /**
@@ -19,59 +147,37 @@ body {
   display: none !important;
 }
 
-.animated {
-  animation-duration: 400ms;
-  animation-fill-mode: both;
-}
-
 /**
- * Animations - courtesy of https://github.com/daneden/animate.css
+ * Window open and close
  */
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.fadeIn {
-  animation-name: fadeIn;
-}
-
 @keyframes zoomIn {
   from {
     opacity: 0;
-    transform: scale3d(0.3, 0.3, 0.3);
+    transform: scale(0.96) translateY(6px);
   }
+}
 
-  50% {
-    opacity: 1;
+@keyframes zoomOut {
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
   }
 }
 
 .zoomIn {
-  animation-name: zoomIn;
-}
-
-@keyframes zoomOut {
-  from {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0;
-    transform: scale3d(0.3, 0.3, 0.3);
-  }
-
-  to {
-    opacity: 0;
-  }
+  animation: zoomIn var(--duration) var(--ease-out) both;
 }
 
 .zoomOut {
-  animation-name: zoomOut;
+  animation: zoomOut var(--duration) ease-in both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration: 1ms;
+  }
+
+  body {
+    transition: none;
+  }
 }

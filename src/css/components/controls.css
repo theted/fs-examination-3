@@ -1,0 +1,97 @@
+/**
+ * Base styles, buttons, fields and links, shared by every window and the
+ * modal (the page's own reset doesn't reach into shadow DOM)
+ */
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+p,
+ul {
+  margin: 0;
+}
+
+ul {
+  padding: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-control);
+  font-size: var(--text-small);
+  font-weight: 600;
+  background: var(--button);
+  transition: background-color var(--duration);
+}
+
+.button:hover {
+  background: var(--button-hover);
+}
+
+.button.primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.button.primary:hover {
+  background: color-mix(in srgb, var(--primary) 86%, var(--on-primary));
+}
+
+input,
+textarea {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  padding: 9px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-control);
+  background: var(--field);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink-soft);
+}
+
+textarea {
+  resize: vertical;
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .button {
+    min-height: 44px;
+    padding: 0 18px;
+  }
+}
+
+.hidden {
+  display: none !important;
+}

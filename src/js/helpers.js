@@ -17,6 +17,17 @@ export const template = (html) =>
   Object.assign(document.createElement('template'), { innerHTML: html })
 
 /**
+ * A constructable stylesheet, shared by every shadow root that adopts it
+ * @param {string} css - e.g. imported with Vite's `?inline`
+ * @returns {CSSStyleSheet}
+ */
+export const stylesheet = (css) => {
+  const sheet = new CSSStyleSheet()
+  sheet.replaceSync(css)
+  return sheet
+}
+
+/**
  * Append a new child element
  * @param {HTMLElement} parent
  * @param {string} type - tag name

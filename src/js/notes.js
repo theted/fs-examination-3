@@ -1,11 +1,13 @@
 /**
  * Notes module
  */
+import notesCss from '../css/components/notes.css?inline'
 import AppWindow from './appwindow.js'
 import storage from './storage.js'
 import htmlTemplate from './notes.html.js'
-import cssTemplate from './notes.css.js'
-import { addTo, safify } from './helpers.js'
+import { addTo, safify, stylesheet } from './helpers.js'
+
+const sheet = stylesheet(notesCss)
 
 // notes shown before anything has been saved
 const defaultNotes = ['Foo', 'Bar', 'Ny notering']
@@ -28,14 +30,13 @@ export default class NotesApp extends AppWindow {
   #saveButton
   #newButton
   #closeButton
+  #status
 
   constructor() {
     super()
 
-    this._contentElem.append(
-      cssTemplate.content.cloneNode(true),
-      htmlTemplate.content.cloneNode(true)
-    )
+    this._addStyles(sheet)
+    this._contentElem.append(htmlTemplate.content.cloneNode(true))
 
     this.#list = this.shadowRoot.querySelector('#notes-list')
     this.#editor = this.shadowRoot.querySelector('#notes-edit')
@@ -44,10 +45,14 @@ export default class NotesApp extends AppWindow {
     this.#saveButton = this.shadowRoot.querySelector('button[name="save"]')
     this.#newButton = this.shadowRoot.querySelector('button[name="new"]')
     this.#closeButton = this.shadowRoot.querySelector('button[name="close"]')
+    this.#status = this.shadowRoot.querySelector('.status')
 
     this.#saveButton.addEventListener('click', () => this.save())
     this.#closeButton.addEventListener('click', () => this.showList())
     this.#newButton.addEventListener('click', () => this.newNote())
+
+    // any edit makes "Saved" out of date
+    this.#editor.addEventListener('input', () => this.#setStatus(''))
 
     this.showList()
   }
@@ -62,8 +67,9 @@ export default class NotesApp extends AppWindow {
     const list = document.createElement('ul')
     list.classList.add('list')
     for (const title of loadNotes()) {
-      const link = addTo(addTo(list, 'li'), 'a', title)
-      link.addEventListener('click', () => this.openNote(title))
+      const note = addTo(addTo(list, 'li'), 'button', title, 'note')
+      note.type = 'button'
+      note.addEventListener('click', () => this.openNote(title))
     }
     this.#list.replaceChildren(list)
 
@@ -116,6 +122,11 @@ export default class NotesApp extends AppWindow {
 
     storage.set(noteKey(title), this.#contentInput.value)
     this.setTitle(title)
+    this.#setStatus('Saved')
+  }
+
+  #setStatus(text) {
+    this.#status.textContent = text
   }
 
   /**
@@ -123,6 +134,7 @@ export default class NotesApp extends AppWindow {
    * @param {boolean} editing
    */
   #showEditor(editing) {
+    this.#setStatus('')
     this.#list.classList.toggle('hidden', editing)
     this.#editor.classList.toggle('hidden', !editing)
     this.#newButton.classList.toggle('hidden', editing)

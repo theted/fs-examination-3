@@ -1,0 +1,125 @@
+/**
+ * Memory game
+ */
+:host {
+  --window-width: 440px;
+}
+
+.score-elem {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 16px 4px;
+}
+
+.stat {
+  display: grid;
+}
+
+.label {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}
+
+.value {
+  font-size: var(--text-title);
+  font-weight: 650;
+}
+
+.new-game {
+  margin-left: auto;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 12px 16px 16px;
+}
+
+.tiles img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow:
+    0 1px 2px rgb(8 12 24 / 0.2),
+    0 0 0 1px var(--hairline);
+  transition:
+    box-shadow var(--duration),
+    opacity 400ms,
+    filter 400ms,
+    translate var(--duration) var(--ease-out);
+}
+
+.tiles img:hover {
+  translate: 0 -2px;
+}
+
+.tiles img.face-up {
+  animation: flip 260ms var(--ease-out);
+}
+
+.tiles img.success {
+  box-shadow:
+    0 0 0 3px var(--hit),
+    0 0 24px color-mix(in srgb, var(--hit) 55%, transparent);
+}
+
+.tiles img.failure {
+  box-shadow: 0 0 0 3px var(--miss);
+  animation: shake 320ms;
+}
+
+/* found pairs stay faintly visible */
+.tiles img.cleared {
+  opacity: 0.28;
+  filter: grayscale(1);
+  cursor: default;
+  translate: none;
+  box-shadow: none;
+}
+
+.done {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 40px 0 32px;
+  text-align: center;
+}
+
+.done h1 {
+  font-size: var(--text-display);
+  font-weight: 680;
+  font-stretch: var(--stretch-title);
+}
+
+.done p {
+  margin-bottom: 8px;
+  color: var(--ink-soft);
+}
+
+@keyframes flip {
+  from {
+    transform: perspective(600px) rotateY(75deg);
+  }
+}
+
+@keyframes shake {
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tiles img {
+    animation: none !important;
+    translate: none !important;
+  }
+}

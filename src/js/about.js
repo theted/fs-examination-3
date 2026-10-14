@@ -1,18 +1,19 @@
 /**
  * About module
  */
+import aboutCss from '../css/components/about.css?inline'
 import AppWindow from './appwindow.js'
 import htmlTemplate from './about.html.js'
-import cssTemplate from './about.css.js'
+import { stylesheet } from './helpers.js'
+
+const sheet = stylesheet(aboutCss)
 
 export default class AboutApp extends AppWindow {
   constructor() {
     super()
 
-    this._contentElem.append(
-      cssTemplate.content.cloneNode(true),
-      htmlTemplate.content.cloneNode(true)
-    )
+    this._addStyles(sheet)
+    this._contentElem.append(htmlTemplate.content.cloneNode(true))
     this.setTitle('Personal web desktop!')
   }
 }

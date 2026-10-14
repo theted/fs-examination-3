@@ -1,0 +1,14 @@
+/**
+ * About
+ */
+section {
+  display: grid;
+  gap: 10px;
+  max-width: 60ch;
+  padding: 16px 20px 20px;
+}
+
+.credit {
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+}

@@ -1,18 +1,27 @@
 /**
- * The dock: a link per app, which opens a new window of it.
- * Also reopens the windows that were open last time.
+ * The dock: a link per app, which opens a new window of it, with a dot for
+ * apps that have open windows. Also reopens the windows that were open last
+ * time.
  */
-import cssTemplate from './app-icons.css.js'
+import dockCss from '../css/components/dock.css?inline'
+import './app-icon.js'
 import Config from './config.js'
 import storage from './storage.js'
-import { addTemplate } from './helpers.js'
+import { addTemplate, stylesheet } from './helpers.js'
+
+const sheet = stylesheet(dockCss)
+
+/** Display name of an app, e.g. 'memory' -> 'Memory' */
+const appName = (app) => app[0].toUpperCase() + app.slice(1)
 
 export default class AppIcons extends HTMLElement {
+  #observer = null
+
   constructor() {
     super()
 
     this.attachShadow({ mode: 'open' })
-    this.shadowRoot.append(cssTemplate.content.cloneNode(true))
+    this.shadowRoot.adoptedStyleSheets = [sheet]
     const list = this.shadowRoot.appendChild(document.createElement('ul'))
     list.id = 'app-icons'
 
@@ -27,8 +36,8 @@ export default class AppIcons extends HTMLElement {
         /* html */ `
           <li>
             <a href="#${app}" id="link-${app}">
-              <img src="/image/icons/${app}-app.png" alt="">
-              <span class="link-name">${app}</span>
+              <app-icon img="${app}-app"></app-icon>
+              <span class="link-name">${appName(app)}</span>
             </a>
           </li>
         `,
@@ -58,6 +67,15 @@ export default class AppIcons extends HTMLElement {
       'auto-hide',
       storage.get('settings-autoHide') === 'true'
     )
+
+    // keep the open-window dots up to date
+    this.#markOpenApps()
+    this.#observer ??= new MutationObserver(() => this.#markOpenApps())
+    this.#observer.observe(document.body, { childList: true })
+  }
+
+  disconnectedCallback() {
+    this.#observer?.disconnect()
   }
 
   /**
@@ -75,6 +93,18 @@ export default class AppIcons extends HTMLElement {
     win.setAttribute('x', x)
     win.setAttribute('y', y)
     document.body.append(win)
+  }
+
+  /**
+   * Mark the apps that have open windows
+   */
+  #markOpenApps() {
+    for (const app of Config.availableApps) {
+      const open = document.getElementsByTagName(`${app}-app`).length
+      const link = this.shadowRoot.querySelector(`#link-${app}`)
+      link.toggleAttribute('data-open', open > 0)
+      link.title = open ? `${appName(app)}: ${open} open` : appName(app)
+    }
   }
 
   /**

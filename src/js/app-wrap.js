@@ -23,8 +23,12 @@ export default class AppWrap extends HTMLElement {
    * Apply the saved theme and background
    */
   init() {
-    document.body.className =
-      storage.get('setting-theme') || Config.defaults.theme
+    const theme = storage.get('setting-theme')
+    document.documentElement.dataset.theme = Config.availableThemes.includes(
+      theme
+    )
+      ? theme
+      : Config.defaults.theme
     setBackgroundImage(
       storage.get('settings-background') || Config.defaults.background,
       document.body

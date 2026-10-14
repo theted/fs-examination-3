@@ -47,20 +47,19 @@ async function settled(locator) {
   })
 }
 
-/** Position and stacking order of a window */
+/**
+ * Position, size and stacking order of a window. Uses the layout box, so a
+ * held window's slight lift (scale) doesn't count as moving it.
+ */
 export async function windowState(locator) {
   await settled(locator)
-  const box = await locator.boundingBox()
-  const z = await locator.evaluate(
-    (el) => Number(getComputedStyle(el).zIndex) || 0
-  )
-  return {
-    x: Math.round(box.x),
-    y: Math.round(box.y),
-    width: box.width,
-    height: box.height,
-    z
-  }
+  return locator.evaluate((el) => ({
+    x: el.offsetLeft,
+    y: el.offsetTop,
+    width: el.offsetWidth,
+    height: el.offsetHeight,
+    z: Number(getComputedStyle(el).zIndex) || 0
+  }))
 }
 
 /** Center of an element, for mouse/touch input */
