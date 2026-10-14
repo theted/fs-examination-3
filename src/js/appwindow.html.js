@@ -1,5 +1,6 @@
-const template = document.createElement('template')
-template.innerHTML = /* html */ `
+import { template } from './helpers.js'
+
+export default template(/* html */ `
   <div class="header">
     <div class="icon">
       <app-icon></app-icon>
@@ -12,6 +13,4 @@ template.innerHTML = /* html */ `
     </div>
   </div>
   <div class="content"></div>
-`
-
-export default template
+`)

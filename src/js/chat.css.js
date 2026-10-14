@@ -50,6 +50,7 @@ template.innerHTML = /* html */ `
 
     :host .message .text {
       color: #888;
+      white-space: pre-wrap;
       order: 3;
       flex-basis: 100%;
     }

@@ -1,5 +1,6 @@
-const template = document.createElement('template')
-template.innerHTML = /* html */ `
+import { template } from './helpers.js'
+
+export default template(/* html */ `
 
   <div class="notes-content">
     <section id="notes-list"></section>
@@ -11,9 +12,6 @@ template.innerHTML = /* html */ `
       <button name="save">Save</button>
       <button name="new">New</button>
       <button name="close">Close</button>
-      <span class="state"></span>
     </section>
   </div>
-`
-
-export default template
+`)

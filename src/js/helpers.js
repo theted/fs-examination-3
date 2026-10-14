@@ -1,60 +1,58 @@
 /**
- * Return current timstamp in human-readable format
+ * Small DOM and string helpers
  */
-function timeStamp() {
-  let dt = new Date()
-  return dt.toLocaleTimeString('sv-SE')
-}
 
 /**
- * Add a child element to a existing parent node
- * @param {HTML Element} parent
- * @param {String} type
- * @param {String} text
- * @param {String} className
+ * Current time in human-readable format, e.g. 14:05:09
+ * @returns {string}
  */
-function addTo(parent, type, text, className) {
-  let child = parent.appendChild(document.createElement(type))
-  if (text) {
-    child.textContent = text
-  }
-  if (className) {
-    child.classList.add(className)
-  }
+export const timeStamp = () => new Date().toLocaleTimeString('sv-SE')
+
+/**
+ * Create a <template> element from an HTML string
+ * @param {string} html
+ * @returns {HTMLTemplateElement}
+ */
+export const template = (html) =>
+  Object.assign(document.createElement('template'), { innerHTML: html })
+
+/**
+ * Append a new child element
+ * @param {HTMLElement} parent
+ * @param {string} type - tag name
+ * @param {string} [text]
+ * @param {string} [className]
+ * @returns {HTMLElement} the new element
+ */
+export const addTo = (parent, type, text, className) => {
+  const child = parent.appendChild(document.createElement(type))
+  if (text) child.textContent = text
+  if (className) child.classList.add(className)
   return child
 }
 
 /**
- * Add HTML to a DOM node
- * @param {String} HTML
- * @param {HTML Element} parent
+ * Append HTML to an element
+ * @param {string} html
+ * @param {HTMLElement} parent
  */
-function addTemplate(html, parent) {
-  let template = document.createElement('template')
-  template.innerHTML = html
-  parent.appendChild(template.content.cloneNode(true))
+export const addTemplate = (html, parent) =>
+  parent.append(template(html).content)
+
+/**
+ * Use an image as an element's background
+ * @param {string} img - image URL
+ * @param {HTMLElement} el
+ */
+export const setBackgroundImage = (img, el) => {
+  el.style.backgroundImage = `url("${img}")`
 }
 
 /**
- * Set background image of an element
- * @param {String} img path
- * @param {HTML Element} element
+ * A key that is safe to use, e.g. in storage: lower case, spaces replaced
+ * with underscores, other non-word characters removed
+ * @param {string} str
+ * @returns {string}
  */
-function setBackgroundImage(img, el) {
-  el.style.backgroundImage = 'url("' + img + '")'
-}
-
-/**
- * Return a safe-to-use string from string
- * @param {String} String
- * @returns {String} Safe(r) string
- */
-function safify(str) {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .join('_') // replace spaces with underscore | alternative approach -> .replace(/ /g, '-')
-    .replace(/\W/g, '') // remove non-alphanumeric (or underscore) characters
-}
-
-export { timeStamp, addTo, addTemplate, setBackgroundImage, safify }
+export const safify = (str) =>
+  str.toLowerCase().replaceAll(' ', '_').replace(/\W/g, '')

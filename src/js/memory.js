@@ -6,239 +6,193 @@ import AppModal from './app-modal.js'
 import cssTemplate from './memory.css.js'
 import htmlTemplate from './memory.html.js'
 
+const imgPath = '/image/memory/'
+const hiddenTile = `${imgPath}0.png`
+const maxPairs = 8
+const revealTime = 1000 // ms a turned pair stays visible
+
+/**
+ * Randomize the order of an array, in place (Fisher-Yates)
+ * @param {Array} array
+ * @returns {Array} the same array
+ */
+const shuffle = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
+  }
+  return array
+}
+
 export default class MemoryApp extends AppWindow {
+  #pairs = maxPairs // pairs in a game
+  #remaining = 0 // pairs left to find
+  #attempts = 0
+  #fails = 0
+  #turned = [] // tiles turned in the current guess
+  #locked = false // while a wrong pair is showing
+  #tilesElem
+  #scoreElem
+  #failsElem
+  #accuracyElem
+
   constructor() {
     super()
 
-    // options
-    this.imgPath = '/image/memory/'
-    this.defaultTile = this.imgPath + '0.png'
-    this.maxTiles = 8
-    this.numTiles = this.maxTiles
-    this.timeout = 1000
+    this._contentElem.append(
+      cssTemplate.content.cloneNode(true),
+      htmlTemplate.content.cloneNode(true)
+    )
+    this.#tilesElem = this._contentElem.querySelector('.tiles')
+    this.#scoreElem = this._contentElem.querySelector('#score')
+    this.#failsElem = this._contentElem.querySelector('#fails')
+    this.#accuracyElem = this._contentElem.querySelector('#accur')
 
-    // elements
-    this._contentElem.appendChild(cssTemplate.content.cloneNode(true))
-    this._contentElem.appendChild(htmlTemplate.content.cloneNode(true))
-    this._tilesElem = this._contentElem.querySelector('.tiles')
-    this._scoreElement = this._contentElem.querySelector('#score')
-    this._failsElement = this._contentElem.querySelector('#fails')
-    this._accurracyElement = this._contentElem.querySelector('#accur')
+    this.#tilesElem.addEventListener('click', (event) => {
+      if (event.target.matches('img')) this.#turn(event.target)
+    })
 
     // play with the keyboard: Enter or Space turns the focused tile
-    this._tilesElem.addEventListener('keydown', (event) => {
+    this.#tilesElem.addEventListener('keydown', (event) => {
       if (
         (event.key === 'Enter' || event.key === ' ') &&
         event.target.matches('img')
       ) {
         event.preventDefault()
-        this.clickTile(event.target)
+        this.#turn(event.target)
       }
     })
 
     // the window's own icon starts a new game
     this._iconElem.addEventListener('click', () => this.newGame())
 
-    // setup
     this.setTitle('Memory game')
     this.start()
   }
 
   /**
-   * Start / reset the Game
+   * Start (or restart) the game
    */
   start() {
-    this.attempts = 0
-    this.failedAttempts = 0
-    this.remaining = this.numTiles
-    this.clickedElements = []
-    this.locked = false
-    this.createTiles()
-    this.updateScore()
+    this.#remaining = this.#pairs
+    this.#attempts = 0
+    this.#fails = 0
+    this.#turned = []
+    this.#locked = false
+    this.#createTiles()
+    this.#updateScore()
   }
 
   /**
-   * Show remaining pairs, failed guesses and accuracy
-   */
-  updateScore() {
-    const matches = this.attempts - this.failedAttempts
-    const accuracy = this.attempts
-      ? Math.round((matches / this.attempts) * 100)
-      : 0
-
-    this._scoreElement.textContent = this.remaining
-    this._failsElement.textContent = this.failedAttempts
-    this._accurracyElement.textContent = accuracy + ' %'
-  }
-
-  /**
-   * (re)create tiles
-   */
-  createTiles() {
-    this._tilesElem.innerHTML = '' // reset tiles element
-    let tiles = [...Array(this.numTiles).keys()] // create array of n length
-    tiles = tiles.concat(tiles) // duplicate array
-    tiles = this._shuffle(tiles) // randomize tilesay order
-    tiles.forEach((tile) => this._createTile(tile)) // create a tile for each array item
-  }
-
-  /**
-   * Append a tile to the app window
-   * @param {number} Number of tile
-   */
-  _createTile(number) {
-    let tile = document.createElement('img')
-    tile.src = this.defaultTile
-    tile.setAttribute('image-number', number + 1)
-    tile.setAttribute('tabindex', 0)
-    tile.addEventListener('click', (event) => this.clickTile(event.target))
-    this._tilesElem.appendChild(tile)
-  }
-
-  /**
-   * Click handler for tiles
-   * @param {Tile} Tile element
-   */
-  clickTile(el) {
-    // ignore matched tiles, the tile that is already turned, and clicks
-    // while a wrong pair is still showing
-    if (this.locked || el.matched || this.clickedElements.includes(el)) {
-      return false
-    }
-
-    this.clickedElements.push(el)
-
-    el.src = this.imgPath + el.getAttribute('image-number') + '.png'
-
-    if (this.clickedElements.length === 2) {
-      ++this.attempts
-
-      if (this.matchTiles(this.clickedElements)) {
-        this.sucessfulMatch(this.clickedElements)
-      } else {
-        this.failureMatch(this.clickedElements)
-      }
-
-      this.clickedElements = [] // reset clicked elements
-      this.updateScore()
-    }
-  }
-
-  /**
-   * Check if two tiles matchs
-   * @param {Tiles[]} Array of tiles
-   */
-  matchTiles(tiles) {
-    let firstNum = tiles[0].getAttribute('image-number')
-    let secondNumber = tiles[1].getAttribute('image-number')
-    let match = firstNum === secondNumber
-    return match
-  }
-
-  /**
-   * Sucessful match handling
-   * @param {Tiles[]} tiles
-   */
-  sucessfulMatch(tiles) {
-    tiles.forEach((tile) => {
-      tile.matched = true
-      tile.classList.add('success')
-      setTimeout(() => {
-        this.removeTile(tile)
-      }, this.timeout)
-    })
-
-    --this.remaining
-
-    if (this.remaining === 0) {
-      this.gameCompleted()
-    }
-  }
-
-  /**
-   * Failure match
-   * @param {Tiles[]} tiles
-   */
-  failureMatch(tiles) {
-    ++this.failedAttempts
-
-    // show the wrong pair for a moment before turning it back
-    this.locked = true
-    tiles.forEach((tile) => tile.classList.add('failure'))
-    setTimeout(() => {
-      tiles.forEach((tile) => this.resetTile(tile))
-      this.locked = false
-    }, this.timeout)
-  }
-
-  /**
-   * Remove a tile from the game area
-   * @param {Tile} tile
-   */
-  removeTile(tile) {
-    tile.src = '/image/pixel.png'
-    tile.setAttribute('tabindex', -1)
-  }
-
-  /**
-   * Reset a single tile
-   * @param {Tile} tile
-   */
-  resetTile(tile) {
-    tile.src = this.defaultTile
-    tile.classList.remove('success')
-    tile.classList.remove('failure')
-  }
-
-  /**
-   * Stuff when game is completed
-   */
-  gameCompleted() {
-    let ttl = document.createElement('h1')
-    ttl.textContent = 'GAME COMPLETED!'
-
-    let btn = document.createElement('button')
-    btn.textContent = 'Restart'
-    btn.addEventListener('click', (event) => this.start())
-
-    this._tilesElem.innerHTML = ''
-    this._tilesElem.appendChild(ttl)
-    this._tilesElem.appendChild(btn)
-  }
-
-  /**
-   * Randomize order of an array
-   * @param {array} array
-   */
-  _shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[array[i], array[j]] = [array[j], array[i]]
-    }
-    return array
-  }
-
-  /**
-   * Start new game, allowing the user to choose number of tiles
-   * through a modal window.
+   * Ask for the number of pairs and start a new game
    */
   async newGame() {
-    const rounds = await AppModal.prompt({
+    const answer = await AppModal.prompt({
       content: 'Rounds',
       placeholder: 'rounds',
-      value: this.numTiles,
+      value: this.#pairs,
       type: 'number',
       min: 1,
-      max: this.maxTiles
+      max: maxPairs
     })
 
-    const numTiles = parseInt(rounds, 10)
-    if (!(numTiles >= 1)) return // dismissed, or not a number
+    const pairs = parseInt(answer, 10)
+    if (!(pairs >= 1)) return // dismissed, or not a number
 
-    this.numTiles = Math.min(numTiles, this.maxTiles)
+    this.#pairs = Math.min(pairs, maxPairs)
     this.start()
+  }
+
+  #createTiles() {
+    const images = Array.from({ length: this.#pairs }, (_, i) => i + 1)
+    const tiles = shuffle([...images, ...images]).map((image) => {
+      const tile = document.createElement('img')
+      tile.src = hiddenTile
+      tile.alt = 'Memory tile'
+      tile.dataset.image = image
+      tile.tabIndex = 0
+      return tile
+    })
+    this.#tilesElem.replaceChildren(...tiles)
+  }
+
+  /**
+   * Turn a tile face up; every second tile completes a guess
+   * @param {HTMLImageElement} tile
+   */
+  #turn(tile) {
+    // ignore matched tiles, the tile that is already turned, and turns while
+    // a wrong pair is still showing
+    if (
+      this.#locked ||
+      tile.classList.contains('matched') ||
+      this.#turned.includes(tile)
+    ) {
+      return
+    }
+
+    tile.src = `${imgPath}${tile.dataset.image}.png`
+    this.#turned.push(tile)
+    if (this.#turned.length < 2) return
+
+    const pair = this.#turned
+    this.#turned = []
+    this.#attempts++
+
+    if (pair[0].dataset.image === pair[1].dataset.image) this.#match(pair)
+    else this.#miss(pair)
+    this.#updateScore()
+  }
+
+  #match(pair) {
+    for (const tile of pair) {
+      tile.classList.add('matched', 'success')
+      setTimeout(() => {
+        tile.src = '/image/pixel.png'
+        tile.tabIndex = -1
+      }, revealTime)
+    }
+
+    if (--this.#remaining === 0) this.#gameCompleted()
+  }
+
+  #miss(pair) {
+    this.#fails++
+
+    // show the wrong pair for a moment before turning it back
+    this.#locked = true
+    pair.forEach((tile) => tile.classList.add('failure'))
+    setTimeout(() => {
+      for (const tile of pair) {
+        tile.src = hiddenTile
+        tile.classList.remove('failure')
+      }
+      this.#locked = false
+    }, revealTime)
+  }
+
+  #updateScore() {
+    const matches = this.#attempts - this.#fails
+    const accuracy = this.#attempts
+      ? Math.round((matches / this.#attempts) * 100)
+      : 0
+
+    this.#scoreElem.textContent = this.#remaining
+    this.#failsElem.textContent = this.#fails
+    this.#accuracyElem.textContent = `${accuracy} %`
+  }
+
+  #gameCompleted() {
+    const title = document.createElement('h1')
+    title.textContent = 'GAME COMPLETED!'
+
+    const restart = document.createElement('button')
+    restart.textContent = 'Restart'
+    restart.addEventListener('click', () => this.start())
+
+    this.#tilesElem.replaceChildren(title, restart)
   }
 }
 
 // register element
-window.customElements.define('memory-app', MemoryApp)
+customElements.define('memory-app', MemoryApp)

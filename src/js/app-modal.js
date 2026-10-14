@@ -1,11 +1,5 @@
-import htmlTemplate from './app-modal.html.js'
-import cssTemplate from './app-modal.css.js'
-
 /**
  * Modal prompt
- *
- *   // USAGE:
- *   /////////////////////////////////////////////////////////////////////////
  *
  *   const username = await AppModal.prompt({
  *     content: 'Please provide an username',
@@ -14,22 +8,43 @@ import cssTemplate from './app-modal.css.js'
  *   // -> the entered text, or null if the modal was dismissed
  *   //    (Escape, or a click outside the dialog)
  *
- *   Supported options: title, content, placeholder, value, type, min, max
+ * Options: title, content, and the input's placeholder, value, type, min, max
  */
-export default class AppModal extends window.HTMLElement {
+import htmlTemplate from './app-modal.html.js'
+import cssTemplate from './app-modal.css.js'
+
+export default class AppModal extends HTMLElement {
+  static observedAttributes = [
+    'title',
+    'content',
+    'placeholder',
+    'value',
+    'type',
+    'min',
+    'max'
+  ]
+
+  #resolve
+  #titleElem
+  #contentElem
+  #input
+
   constructor() {
     super()
 
     this.attachShadow({ mode: 'open' })
-    this.shadowRoot.appendChild(htmlTemplate.content.cloneNode(true))
-    this.shadowRoot.appendChild(cssTemplate.content.cloneNode(true))
+    this.shadowRoot.append(
+      htmlTemplate.content.cloneNode(true),
+      cssTemplate.content.cloneNode(true)
+    )
 
-    this._titleElem = this.shadowRoot.querySelector('h2')
-    this._contentElem = this.shadowRoot.querySelector('p')
-    this._inputElem = this.shadowRoot.querySelector('input')
-    this._buttonElem = this.shadowRoot.querySelector('button')
+    this.#titleElem = this.shadowRoot.querySelector('h2')
+    this.#contentElem = this.shadowRoot.querySelector('p')
+    this.#input = this.shadowRoot.querySelector('input')
 
-    this._buttonElem.addEventListener('click', () => this.submit())
+    this.shadowRoot
+      .querySelector('button')
+      .addEventListener('click', () => this.submit())
 
     this.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') this.submit()
@@ -45,7 +60,7 @@ export default class AppModal extends window.HTMLElement {
   /**
    * Show a modal and wait for the user's answer
    * @param {Object} options - attributes to set, e.g. { content, placeholder }
-   * @returns {Promise<String|null>} the entered text, or null if dismissed
+   * @returns {Promise<string|null>} the entered text, or null if dismissed
    */
   static prompt(options = {}) {
     const modal = document.createElement('app-modal')
@@ -54,126 +69,43 @@ export default class AppModal extends window.HTMLElement {
     }
 
     return new Promise((resolve) => {
-      modal._resolve = resolve
-      document.body.appendChild(modal)
+      modal.#resolve = resolve
+      document.body.append(modal)
     })
   }
 
   connectedCallback() {
     // focus the input once the modal is in the document
-    this._inputElem.focus()
+    this.#input.focus()
   }
 
   /**
-   * Close the modal with the entered value (empty values are not accepted)
+   * Close the modal with the entered text (empty answers are not accepted)
    */
   submit() {
-    let val = this._inputElem.value.trim()
-
-    // prevent submission of empty values
-    if (val.length < 1) return false
-
-    this._close(val)
+    const value = this.#input.value.trim()
+    if (value) this.#close(value)
   }
 
   /**
-   * Close the modal without a value
+   * Close the modal without an answer
    */
   dismiss() {
-    this._close(null)
+    this.#close(null)
   }
 
-  _close(value) {
+  #close(value) {
     this.remove()
-    this._resolve?.(value)
+    this.#resolve?.(value)
   }
 
-  /**
-   * Set title of modal window
-   * @param {String} title
-   */
-  setTitle(title) {
-    this._titleElem.textContent = title
-  }
-
-  /**
-   * Set content of modal window
-   * @param {String} content
-   */
-  setContent(content) {
-    this._contentElem.textContent = content
-  }
-
-  /**
-   * Set placeholder of modal window
-   * @param {String} placeholder
-   */
-  setPlaceholder(placeholder) {
-    this._inputElem.placeholder = placeholder
-  }
-
-  /**
-   * Set placeholder of modal window
-   * @param {String} placeholder
-   */
-  setValue(value) {
-    this._inputElem.value = value
-  }
-
-  /**
-   * Set placeholder of modal window
-   * @param {String} placeholder
-   */
-  setType(type) {
-    this._inputElem.type = type
-  }
-
-  /**
-   * Set placeholder of modal window
-   * @param {String} placeholder
-   */
-  setMax(max) {
-    this._inputElem.max = max
-  }
-
-  /**
-   * Set minimum value of the input
-   * @param {String} min
-   */
-  setMin(min) {
-    this._inputElem.min = min
-  }
-
-  static get observedAttributes() {
-    return ['title', 'content', 'placeholder', 'value', 'type', 'min', 'max']
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    switch (name) {
-      case 'title':
-        this.setTitle(newValue)
-        break
-      case 'content':
-        this.setContent(newValue)
-        break
-      case 'placeholder':
-        this.setPlaceholder(newValue)
-        break
-      case 'value':
-        this.setValue(newValue)
-        break
-      case 'type':
-        this.setType(newValue)
-        break
-      case 'min':
-        this.setMin(newValue)
-        break
-      case 'max':
-        this.setMax(newValue)
-        break
-    }
+  attributeChangedCallback(name, oldValue, value) {
+    if (name === 'title') this.#titleElem.textContent = value
+    else if (name === 'content') this.#contentElem.textContent = value
+    // the rest are properties of the input: placeholder, value, type, min, max
+    else this.#input[name] = value
   }
 }
 
 // register element
-window.customElements.define('app-modal', AppModal)
+customElements.define('app-modal', AppModal)

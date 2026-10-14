@@ -5,13 +5,24 @@ export default [
   { ignores: ['dist/', 'test-results/', 'playwright-report/'] },
   js.configs.recommended,
   {
+    // modern JavaScript
+    rules: {
+      eqeqeq: 'error',
+      'no-var': 'error',
+      'object-shorthand': 'error',
+      'prefer-arrow-callback': 'error',
+      'prefer-const': 'error',
+      'prefer-template': 'error'
+    }
+  },
+  {
     files: ['src/**/*.js'],
     languageOptions: {
       globals: globals.browser
     },
     rules: {
-      // unused event/callback parameters are fine in DOM handlers
-      'no-unused-vars': ['error', { args: 'none' }]
+      // no leftover debug logging
+      'no-console': ['error', { allow: ['warn', 'error'] }]
     }
   },
   {

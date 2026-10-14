@@ -2,154 +2,134 @@
  * Notes module
  */
 import AppWindow from './appwindow.js'
-import Storage from './storage.js'
+import storage from './storage.js'
 import htmlTemplate from './notes.html.js'
 import cssTemplate from './notes.css.js'
-import * as _ from './helpers.js'
-const storage = new Storage()
+import { addTo, safify } from './helpers.js'
 
 // notes shown before anything has been saved
 const defaultNotes = ['Foo', 'Bar', 'Ny notering']
 
+/** @returns {string[]} titles of all saved notes */
+const loadNotes = () => storage.getJSON('notes') ?? defaultNotes
+
+/** @param {string[]} titles */
+const saveNotes = (titles) => storage.setJSON('notes', titles)
+
+/** Storage key for a note's content */
+const noteKey = (title) => `note-${safify(title)}`
+
 export default class NotesApp extends AppWindow {
+  #currentNote = null // title of the note being edited, null for a new note
+  #list
+  #editor
+  #titleInput
+  #contentInput
+  #saveButton
+  #newButton
+  #closeButton
+
   constructor() {
     super()
 
-    this._contentElem.appendChild(cssTemplate.content.cloneNode(true))
-    this._contentElem.appendChild(htmlTemplate.content.cloneNode(true))
+    this._contentElem.append(
+      cssTemplate.content.cloneNode(true),
+      htmlTemplate.content.cloneNode(true)
+    )
 
-    this._note = this.shadowRoot.querySelector('textarea[name="note"]')
-    this._noteTitle = this.shadowRoot.querySelector('input[name="title"]')
-    this._notesList = this.shadowRoot.querySelector('#notes-list')
-    this._noteElem = this.shadowRoot.querySelector('#notes-edit')
-    this._saveBtn = this.shadowRoot.querySelector('button[name="save"]')
-    this._newBtn = this.shadowRoot.querySelector('button[name="new"]')
-    this._closeBtn = this.shadowRoot.querySelector('button[name="close"]')
+    this.#list = this.shadowRoot.querySelector('#notes-list')
+    this.#editor = this.shadowRoot.querySelector('#notes-edit')
+    this.#titleInput = this.shadowRoot.querySelector('input[name="title"]')
+    this.#contentInput = this.shadowRoot.querySelector('textarea[name="note"]')
+    this.#saveButton = this.shadowRoot.querySelector('button[name="save"]')
+    this.#newButton = this.shadowRoot.querySelector('button[name="new"]')
+    this.#closeButton = this.shadowRoot.querySelector('button[name="close"]')
 
-    this._saveBtn.addEventListener('click', () => this.save())
-    this._closeBtn.addEventListener('click', () => this.displayNotes())
-    this._newBtn.addEventListener('click', () => this.newNote())
+    this.#saveButton.addEventListener('click', () => this.save())
+    this.#closeButton.addEventListener('click', () => this.showList())
+    this.#newButton.addEventListener('click', () => this.newNote())
 
-    this.displayNotes()
-  }
-
-  /**
-   * Titles of all saved notes
-   * @returns {String[]}
-   */
-  get notes() {
-    return storage.getJSON('notes') || defaultNotes
-  }
-
-  set notes(titles) {
-    storage.setJSON('notes', titles)
-  }
-
-  /**
-   * Storage key for a note's content
-   * @param {String} title
-   */
-  noteKey(title) {
-    return 'note-' + _.safify(title)
-  }
-
-  /**
-   * Render the list of notes
-   */
-  renderList() {
-    let list = document.createElement('ul')
-    list.classList.add('list')
-
-    this.notes.forEach((title) => {
-      let noteElem = document.createElement('li')
-      let linkElem = document.createElement('a')
-
-      linkElem.textContent = title
-      linkElem.addEventListener('click', () => this.selectNote(title))
-
-      noteElem.appendChild(linkElem)
-      list.appendChild(noteElem)
-    })
-
-    this._notesList.innerHTML = ''
-    this._notesList.appendChild(list)
-  }
-
-  /**
-   * Open a saved note for editing
-   * @param {String} title
-   */
-  selectNote(title) {
-    this.currentNote = title
-    this.showNote(title, storage.get(this.noteKey(title)) || '')
-    this.setTitle(title)
-  }
-
-  /**
-   * Show the editor
-   * @param {String} title
-   * @param {String} content
-   */
-  showNote(title = '', content = '') {
-    this._noteTitle.value = title
-    this._note.value = content
-
-    this._notesList.classList.add('hidden')
-    this._noteElem.classList.remove('hidden')
-    this._newBtn.classList.add('hidden')
-    this._saveBtn.classList.remove('hidden')
-    this._closeBtn.classList.remove('hidden')
+    this.showList()
   }
 
   /**
    * Show the list of notes
    */
-  displayNotes() {
-    this.currentNote = null
-    this.renderList()
+  showList() {
+    this.#currentNote = null
     this.setTitle('Notes')
 
-    this._notesList.classList.remove('hidden')
-    this._noteElem.classList.add('hidden')
-    this._newBtn.classList.remove('hidden')
-    this._saveBtn.classList.add('hidden')
-    this._closeBtn.classList.add('hidden')
+    const list = document.createElement('ul')
+    list.classList.add('list')
+    for (const title of loadNotes()) {
+      const link = addTo(addTo(list, 'li'), 'a', title)
+      link.addEventListener('click', () => this.openNote(title))
+    }
+    this.#list.replaceChildren(list)
+
+    this.#showEditor(false)
+  }
+
+  /**
+   * Open a saved note for editing
+   * @param {string} title
+   */
+  openNote(title) {
+    this.#currentNote = title
+    this.#titleInput.value = title
+    this.#contentInput.value = storage.get(noteKey(title)) ?? ''
+    this.setTitle(title)
+    this.#showEditor(true)
   }
 
   /**
    * Edit a new, empty note
    */
   newNote() {
-    this.currentNote = null
-    this.showNote()
+    this.#currentNote = null
+    this.#titleInput.value = ''
+    this.#contentInput.value = ''
     this.setTitle('New note')
-    this._noteTitle.focus()
+    this.#showEditor(true)
+    this.#titleInput.focus()
   }
 
   /**
    * Save the note being edited; a new title adds (or renames) the note
    */
   save() {
-    let title = this._noteTitle.value.trim()
+    const title = this.#titleInput.value.trim()
 
     // a note needs a title
     if (!title) {
-      this._noteTitle.focus()
+      this.#titleInput.focus()
       return
     }
 
-    if (title !== this.currentNote) {
-      let notes = this.notes.filter((note) => note !== this.currentNote)
-      if (this.currentNote) storage.remove(this.noteKey(this.currentNote))
+    if (title !== this.#currentNote) {
+      const notes = loadNotes().filter((note) => note !== this.#currentNote)
+      if (this.#currentNote) storage.remove(noteKey(this.#currentNote))
       if (!notes.includes(title)) notes.push(title)
-      this.notes = notes
-      this.currentNote = title
+      saveNotes(notes)
+      this.#currentNote = title
     }
 
-    storage.set(this.noteKey(title), this._note.value)
+    storage.set(noteKey(title), this.#contentInput.value)
     this.setTitle(title)
+  }
+
+  /**
+   * Switch between the editor and the list
+   * @param {boolean} editing
+   */
+  #showEditor(editing) {
+    this.#list.classList.toggle('hidden', editing)
+    this.#editor.classList.toggle('hidden', !editing)
+    this.#newButton.classList.toggle('hidden', editing)
+    this.#saveButton.classList.toggle('hidden', !editing)
+    this.#closeButton.classList.toggle('hidden', !editing)
   }
 }
 
 // register element
-window.customElements.define('notes-app', NotesApp)
+customElements.define('notes-app', NotesApp)

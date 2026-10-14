@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 async function pairs(page) {
   const numbers = await page
     .locator('memory-app .tiles img')
-    .evaluateAll((tiles) => tiles.map((t) => t.getAttribute('image-number')))
+    .evaluateAll((tiles) => tiles.map((t) => t.dataset.image))
   const byNumber = {}
   numbers.forEach((n, i) => (byNumber[n] ??= []).push(i))
   return Object.values(byNumber)
