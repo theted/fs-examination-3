@@ -33,3 +33,48 @@ test('a saved note keeps its content', async ({ page }) => {
     'Remember the milk'
   )
 })
+
+test('a new note is added to the list and kept after a reload', async ({
+  page
+}) => {
+  const notes = page.locator('notes-app')
+  await notes.locator('button[name="new"]').click()
+  await notes.locator('input[name="title"]').fill('Shopping')
+  await notes.locator('textarea[name="note"]').fill('Eggs')
+  await notes.locator('button[name="save"]').click()
+  await expect(notes.locator('.title h3')).toHaveText('Shopping')
+
+  await page.reload()
+  await expect(notes.locator('#notes-list a')).toHaveText([
+    'Foo',
+    'Bar',
+    'Ny notering',
+    'Shopping'
+  ])
+  await notes.locator('#notes-list a', { hasText: 'Shopping' }).click()
+  await expect(notes.locator('textarea[name="note"]')).toHaveValue('Eggs')
+})
+
+test('changing the title renames the note', async ({ page }) => {
+  const notes = page.locator('notes-app')
+  await notes.locator('#notes-list a', { hasText: 'Foo' }).click()
+  await notes.locator('input[name="title"]').fill('Ideas')
+  await notes.locator('button[name="save"]').click()
+  await notes.locator('button[name="close"]').click()
+
+  await expect(notes.locator('#notes-list a')).toHaveText([
+    'Bar',
+    'Ny notering',
+    'Ideas'
+  ])
+})
+
+test('a note needs a title', async ({ page }) => {
+  const notes = page.locator('notes-app')
+  await notes.locator('button[name="new"]').click()
+  await notes.locator('textarea[name="note"]').fill('No title')
+  await notes.locator('button[name="save"]').click()
+  await notes.locator('button[name="close"]').click()
+
+  await expect(notes.locator('#notes-list a')).toHaveCount(3)
+})
