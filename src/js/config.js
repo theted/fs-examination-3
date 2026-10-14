@@ -14,8 +14,7 @@ const configs = {
   availableApps: ['memory', 'chat', 'notes', 'settings', 'about'],
   availableThemes: ['light', 'dark', 'minimal', 'weird'],
   availableOptions: {
-    autoHide: 'Auto-hide navigation',
-    spec: 'Test'
+    autoHide: 'Auto-hide navigation'
   },
   defaults: {
     theme: 'light',
