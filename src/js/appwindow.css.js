@@ -45,6 +45,7 @@ template.innerHTML = /* html */ `
       border-bottom: 1px solid #d3d3d3;
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
+      user-select: none;
     }
 
     :host .title {
@@ -55,8 +56,10 @@ template.innerHTML = /* html */ `
       border-right: 1px solid rgba(130, 130, 130, 0.12);
     }
 
-    :host .title :hover {
+    /* the title is the drag handle; no browser panning/zooming on it */
+    :host .title {
       cursor: move;
+      touch-action: none;
     }
 
     :host .icon, :host .close {
@@ -180,7 +183,6 @@ template.innerHTML = /* html */ `
 
     :host(.focused) {
       filter: drop-shadow(2px 5px 20px rgba(0,0,0,0.75));
-      z-index: 100;
     }
 
 

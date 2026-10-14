@@ -8,6 +8,9 @@ import './app-icon.js'
 import Storage from './storage.js'
 const storage = new Storage()
 
+// open windows in stacking order, top-most last
+const stack = []
+
 export default class AppWindow extends window.HTMLElement {
   constructor() {
     super()
@@ -31,6 +34,7 @@ export default class AppWindow extends window.HTMLElement {
     this._titleElem = this.shadowRoot.querySelector('.title h3')
     this._closeElem = this.shadowRoot.querySelector('.close')
     this._moveElem = this.shadowRoot.querySelector('.move')
+    this._dragHandle = this.shadowRoot.querySelector('.title')
     this._iconElem = this.shadowRoot.querySelector('app-icon')
     this._iconElem.setAttribute(
       'img',
@@ -39,7 +43,7 @@ export default class AppWindow extends window.HTMLElement {
     this._appIcon = this.shadowRoot.querySelector('app-icon')
 
     // bind event listeners
-    this.addEventListener('mousedown', this._focus)
+    this.addEventListener('pointerdown', this._focus)
     this.addEventListener('blur', this._blur)
 
     this._closeElem.addEventListener('click', () => this.destroy())
@@ -85,64 +89,54 @@ export default class AppWindow extends window.HTMLElement {
   }
 
   /**
-   * Setup drag events
+   * Setup drag events. Pointer events give the mouse and every finger their
+   * own pointerId, so several windows can be dragged at the same time.
    */
   _setupDragEvents() {
-    this.offsetX = parseInt(this.style.left)
-    this.offsetY = parseInt(this.style.top)
-    this.addEventListener('mousedown', this._dragStart, false)
-    this.addEventListener('touchstart', this._dragStart, false)
+    this._dragHandle.addEventListener('pointerdown', (e) => this._dragStart(e))
+    this._dragHandle.addEventListener('pointermove', (e) => this._dragUpdate(e))
+    this._dragHandle.addEventListener('pointerup', (e) => this._dragEnd(e))
+    this._dragHandle.addEventListener('pointercancel', (e) => this._dragEnd(e))
   }
 
   /**
-   * Setup event listeners on drag start
-   * @param {Mouse Event} Mouse event
+   * Start dragging the window with the pointer that went down on it
+   * @param {PointerEvent} Pointer event
    */
   _dragStart(e) {
-    this.dragItem = this
+    // one pointer per window: ignore extra fingers and non-primary buttons
+    if (this._dragPointer !== undefined || e.button !== 0) return
+
+    this._dragPointer = e.pointerId
+    // keep receiving this pointer's events even when it leaves the window
+    this._dragHandle.setPointerCapture(e.pointerId)
+    this._dragOffsetX = e.clientX - this.offsetLeft
+    this._dragOffsetY = e.clientY - this.offsetTop
     this._contentElem.classList.add('dragging')
-    let [x, y] = this.getPosition(e)
-    this.initialX = x - parseInt(this.x) + this.offsetX
-    this.initialY = y - parseInt(this.y) + this.offsetY
-    this.addEventListener('mouseup', this._dragEnd, false)
-    this.addEventListener('mousemove', this._dragUpdate, false)
-    this.addEventListener('touchend', this._dragEnd, false)
-    this.addEventListener('touchmove', this._dragUpdate, false)
   }
 
   /**
-   * Handle drag event update
-   * @param {Mouse Event} Mouse event
+   * Move the window along with its drag pointer
+   * @param {PointerEvent} Pointer event
    */
   _dragUpdate(e) {
-    e.preventDefault()
-    let [x, y] = this.getPosition(e)
-    this.x = parseInt(x - this.initialX + this.offsetX)
-    this.y = parseInt(y - this.initialY + this.offsetY)
-    this.placeElem(this.x, this.y, this.dragItem)
+    if (e.pointerId !== this._dragPointer) return
+
+    this.x = Math.round(e.clientX - this._dragOffsetX)
+    this.y = Math.round(e.clientY - this._dragOffsetY)
+    this.placeElem(this.x, this.y, this)
   }
 
   /**
-   * Stop drag event
-   * @param {Mouse Event} Mouse event
+   * Stop dragging when the drag pointer is released (or cancelled)
+   * @param {PointerEvent} Pointer event
    */
   _dragEnd(e) {
-    this.offsetX = this.x
-    this.offsetY = this.y
-    this.removeEventListener('mousemove', this._dragUpdate, false)
-    this.removeEventListener('touchmove', this._dragUpdate, false)
+    if (e.pointerId !== this._dragPointer) return
+
+    this._dragPointer = undefined
     this._contentElem.classList.remove('dragging')
     this.savePosition()
-  }
-
-  /**
-   * Get position - support for both mouse & touch events
-   * @param {Mouse Event} Mouse event
-   */
-  getPosition(e) {
-    return e.type === 'touchstart' || e.type === 'touchmove'
-      ? [e.touches[0].clientX, e.touches[0].clientY]
-      : [e.clientX, e.clientY]
   }
 
   /**
@@ -193,26 +187,20 @@ export default class AppWindow extends window.HTMLElement {
   }
 
   /**
-   * Focus element
+   * Focus element: raise it to the top, keeping the order of the others, so
+   * windows dragged at the same time all stay above the rest
    */
   _focus() {
     console.log('Focus window', this.tagName)
 
-    // loop through all other elements to remove focused class... - not the most pretty way!
-    let allElems = document.body.children
-    for (let elem of allElems) {
-      if (elem._contentElem) {
-        if (elem.tagName == this.tagName) {
-          elem.classList.add('focused')
+    const index = stack.indexOf(this)
+    if (index !== -1) stack.splice(index, 1)
+    stack.push(this)
 
-          if (elem === this.activeElement) {
-            console.log('SEEMS ACTIVE!')
-          }
-        } else {
-          elem.classList.remove('focused')
-        }
-      }
-    }
+    stack.forEach((win, i) => {
+      win.style.zIndex = 2 + i
+      win.classList.toggle('focused', win === this)
+    })
   }
 
   /**
@@ -263,6 +251,9 @@ export default class AppWindow extends window.HTMLElement {
    * Actions performed when element is removed
    */
   disconnectedCallback() {
+    const index = stack.indexOf(this)
+    if (index !== -1) stack.splice(index, 1)
+
     storage.remove(this.tagName.toLowerCase())
     console.log('Destroying window')
   }
