@@ -1,217 +1,139 @@
 /**
- * Chat module
- * TODO: persist (some!) latest messages in localStorage
+ * Chat module. Hidden from the dock while Config.chatHost is null.
  */
 import AppWindow from './appwindow.js'
 import AppModal from './app-modal.js'
-import Storage from './storage.js'
+import storage from './storage.js'
 import Config from './config.js'
-import * as _ from './helpers.js'
+import { addTo, timeStamp } from './helpers.js'
 import cssTemplate from './chat.css.js'
 import htmlTemplate from './chat.html.js'
-const storage = new Storage()
 
 export default class ChatApp extends AppWindow {
+  #connection = null
+  #username = null
+  #messages // saved messages: [{ time, user, text }]
+  #messagesElem
+  #input
+
   constructor() {
     super()
 
-    // extend content for AppWindow using external template
-    this._contentElem.appendChild(htmlTemplate.content.cloneNode(true))
-    this._contentElem.appendChild(cssTemplate.content.cloneNode(true))
-
-    // setup elems
-    this._messages = this.shadowRoot.querySelector('.chat-messages')
-    this._messageElem = this.shadowRoot.querySelector('textarea')
-    this._sendButton = this.shadowRoot.querySelector('button')
+    this._contentElem.append(
+      htmlTemplate.content.cloneNode(true),
+      cssTemplate.content.cloneNode(true)
+    )
+    this.#messagesElem = this.shadowRoot.querySelector('.chat-messages')
+    this.#input = this.shadowRoot.querySelector('textarea')
     this.setTitle('Live chat')
 
-    // get previous messages from localStorage
-    this.messages = storage.get('messages') || []
-    if (this.messages.length) this.messages = JSON.parse(this.messages)
-
-    // populate previously existing messages if exists in localStorage
-    if (this.messages && this.messages.length) {
-      for (let i = 0; i < this.messages.length; ++i) {
-        let message = this.messages[i]
-        this.displayMessage(message.text, message.user, message.time) // display only; no save since that will caus loop!
-      }
+    // show the messages saved from earlier sessions
+    this.#messages = storage.getJSON('messages') ?? []
+    for (const { text, user, time } of this.#messages) {
+      this.#displayMessage(text, user, time)
     }
 
-    // bind click & enter to submit vents
-    this._sendButton.addEventListener('click', () => {
-      this.sendMessage(this._messageElem.value, this.username)
-    })
+    this.shadowRoot
+      .querySelector('button')
+      .addEventListener('click', () => this.sendMessage(this.#input.value))
 
-    this._messageElem.addEventListener('keyup', (event) => {
-      if (event.key === 'Enter') {
-        this.sendMessage(this._messageElem.value, this.username)
+    // Enter sends, Shift+Enter starts a new line
+    this.#input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault()
+        this.sendMessage(this.#input.value)
       }
     })
-
-    this.setup()
-  }
-
-  /**
-   * Set an username for the chat
-   * @param {String} username
-   */
-  setUsername(username) {
-    this.username = username
-    storage.set('username', username) // save in storage
-  }
-
-  /**
-   * Send a message to the server
-   * @param {string} message
-   * @param {string} username
-   */
-  sendMessage(message, username) {
-    if (!message.length) return false
-
-    this.connection.send(
-      JSON.stringify({
-        type: 'message',
-        data: message,
-        username: username,
-        channel: Config.defaultChatChannel,
-        key: Config.apiKey
-      })
-    )
-
-    this._messageElem.value = '' // clear message box after message has been sent
-  }
-
-  /**
-   * Add a chat message to the chat window
-   * @param {string} mMssage
-   * @param {string} Usernam
-   * @param {string} Timestamp
-   */
-  displayMessage(message, user, time) {
-    let msg = _.addTo(this._messages, 'p', false, 'message')
-    _.addTo(msg, 'span', user, 'user')
-
-    message = this.sanitize(message)
-    message = message.split('\n').join('<br>')
-
-    let msgMsg = _.addTo(msg, 'span', message, 'text')
-    msgMsg.innerHTML = message
-    _.addTo(msg, 'span', time, 'time')
-    this._messages.scrollTop = this._messages.scrollHeight // scroll to bottom of chat window
-    return msg
-  }
-
-  /**
-   * Add a message to the chat window, also save it
-   * @param {string} message
-   * @param {string} user
-   */
-  addMessage(message, user, time) {
-    if (!time) {
-      time = _.timeStamp()
-    }
-    this.displayMessage(message, user, time)
-
-    // save current list of messages in localStorage
-    this.messages.push({
-      time: time,
-      user: user,
-      text: message
-    })
-
-    this.saveMessages()
-  }
-
-  /**
-   * Sanitize string to prevent injection of HTML & JS in messages
-   * @param {String} string
-   * @returns {String} sanitized string
-   * @memberof ChatApp
-   */
-  sanitize(string) {
-    const map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;',
-      '/': '&#x2F;'
-    }
-    const reg = /[&<>"'/]/gi
-    return string.replace(reg, (match) => map[match])
-  }
-
-  saveMessages() {
-    storage.set('messages', JSON.stringify(this.messages))
-  }
-
-  /**
-   * Setup the connection to the chat server,
-   * as well as bindind of related events
-   */
-  setup() {
-    let _this = this
-
-    // require an username for the chat
-    this.requireUsername()
-
-    this.connection = new WebSocket(Config.chatHost, ['soap', 'xmpp'])
-
-    this.connection.onopen = function () {
-      console.log('Connection open!')
-    }
-
-    this.connection.onclose = function () {
-      console.log('Connection closed')
-    }
-
-    /**
-     * Display chat messages as they are received from the server
-     */
-    this.connection.onmessage = function (e) {
-      let res = JSON.parse(e.data)
-      if (res.type === 'message') {
-        _this.addMessage(res.data, res.username)
-      }
-    }
-
-    /**
-     * Display connection errors
-     */
-    this.connection.onerror = function (error) {
-      console.log('Error!', error)
-    }
-  }
-
-  /**
-   * Require an username from the user. Checks for existing username in storage,
-   * opens a modal asking for an username if no previous username exists.
-   */
-  async requireUsername() {
-    let prevUsername = storage.get('username')
-
-    if (prevUsername) {
-      this.setUsername(prevUsername)
-    } else {
-      const username = await AppModal.prompt({
-        content: 'Please provide an username for the chat',
-        placeholder: 'username'
-      })
-      if (username) this.setUsername(username)
-    }
   }
 
   connectedCallback() {
     super.connectedCallback()
-    console.log('Hi fom chat')
+
+    if (!this.#connection) {
+      this.#requireUsername()
+      this.#connect()
+    }
   }
 
   disconnectedCallback() {
     super.disconnectedCallback()
-    this.connection.close()
-    console.log('Bye from chat')
+    this.#connection?.close()
+  }
+
+  /**
+   * Send a message to the server
+   * @param {string} text
+   */
+  sendMessage(text) {
+    if (!text.trim()) return
+
+    this.#connection.send(
+      JSON.stringify({
+        type: 'message',
+        data: text,
+        username: this.#username,
+        channel: Config.defaultChatChannel,
+        key: Config.apiKey
+      })
+    )
+    this.#input.value = ''
+  }
+
+  /**
+   * Use the saved username, or ask for one
+   */
+  async #requireUsername() {
+    this.#username =
+      storage.get('username') ??
+      (await AppModal.prompt({
+        content: 'Please provide an username for the chat',
+        placeholder: 'username'
+      }))
+
+    if (this.#username) storage.set('username', this.#username)
+  }
+
+  #connect() {
+    this.#connection = new WebSocket(Config.chatHost)
+
+    // show chat messages as they arrive (the server also sends heartbeats)
+    this.#connection.addEventListener('message', (event) => {
+      try {
+        const { type, data, username } = JSON.parse(event.data)
+        if (type === 'message') this.#addMessage(data, username)
+      } catch (error) {
+        console.warn('Unreadable chat message', error)
+      }
+    })
+
+    this.#connection.addEventListener('error', () =>
+      this.#displayMessage('Cannot reach the chat server', 'Chat', timeStamp())
+    )
+  }
+
+  /**
+   * Show a message and keep the latest ones for next time
+   */
+  #addMessage(text, user, time = timeStamp()) {
+    this.#displayMessage(text, user, time)
+
+    this.#messages = [...this.#messages, { time, user, text }].slice(
+      -Config.maxChatMessages
+    )
+    storage.setJSON('messages', this.#messages)
+  }
+
+  #displayMessage(text, user, time) {
+    const message = addTo(this.#messagesElem, 'p', '', 'message')
+    addTo(message, 'span', user, 'user')
+    // set as text (line breaks kept by CSS), so messages can't inject HTML
+    addTo(message, 'span', text, 'text')
+    addTo(message, 'span', time, 'time')
+
+    // scroll to the newest message
+    this.#messagesElem.scrollTop = this.#messagesElem.scrollHeight
   }
 }
 
 // register element
-window.customElements.define('chat-app', ChatApp)
+customElements.define('chat-app', ChatApp)

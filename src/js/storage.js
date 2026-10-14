@@ -1,102 +1,65 @@
-export default class Storage {
+/**
+ * localStorage access, plus a tiny publish/subscribe for setting changes
+ */
+const storage = {
   /**
-   * Get value from localStorage
    * @param {string} key
-   * @returns {string} value
+   * @returns {string|null}
    */
-  get(key) {
-    return window.localStorage.getItem(key)
-  }
+  get: (key) => localStorage.getItem(key),
 
   /**
-   * Get
    * @param {string} key
-   * @returns {JSON} data
+   * @returns {*} the parsed value, or null if missing or not valid JSON
    */
   getJSON(key) {
-    return JSON.parse(this.get(key))
-  }
-
-  /**
-   * Set/update localStorage value
-   * @param {string} key
-   * @param {string} val
-   */
-  set(key, val) {
-    window.localStorage.setItem(key, val)
-  }
-
-  /**
-   * Save object as JSON
-   * @param {String} key
-   * @param {Object} data
-   */
-  setJSON(key, val) {
-    return this.set(key, JSON.stringify(val))
-  }
-
-  /**
-   * Remove key from localStorage
-   * @param {string} key
-   */
-  remove(key) {
-    window.localStorage.removeItem(key)
-  }
-
-  /**
-   * List all keys
-   * @returns {string[]} List of keys
-   */
-  keys() {
-    var keys = []
-    for (var i = 0, len = window.localStorage.length; i < len; ++i) {
-      keys.push(window.localStorage.key(i))
+    try {
+      return JSON.parse(this.get(key))
+    } catch {
+      return null
     }
-    return keys
-  }
-
-  debug() {
-    var storageKeys = this.keys()
-    for (var i = 0, len = storageKeys.length; i < len; i++) {
-      console.log(storageKeys[i], '->', this.get(storageKeys[i]))
-    }
-  }
+  },
 
   /**
-   * Dispatch an update event
-   * @param {String} key
+   * @param {string} key
+   * @param {string} value
+   */
+  set: (key, value) => localStorage.setItem(key, value),
+
+  /**
+   * @param {string} key
+   * @param {*} value - saved as JSON
+   */
+  setJSON(key, value) {
+    this.set(key, JSON.stringify(value))
+  },
+
+  /**
+   * @param {string} key
+   */
+  remove: (key) => localStorage.removeItem(key),
+
+  /**
+   * Save a value and announce the change with a `storage-update` event
+   * @param {string} key
    * @param {*} value
-   * @param {String} event name (default: `storage-update`)
-   * @param {HTML Element} Target (default: document.body)
    */
-  publish(key, value, eventName = 'storage-update', target = document.body) {
+  publish(key, value) {
     this.set(key, value)
+    document.body.dispatchEvent(
+      new CustomEvent('storage-update', { detail: { key, value } })
+    )
+  },
 
-    target.dispatchEvent(
-      new window.CustomEvent(eventName, {
-        bubbles: true,
-        detail: {
-          key: key,
-          value: value
-        }
-      })
+  /**
+   * Run a callback for every published change
+   * @param {(change: { key: string, value: * }) => void} callback
+   */
+  subscribe(callback) {
+    document.body.addEventListener('storage-update', (event) =>
+      callback(event.detail)
     )
   }
-
-  /**
-   * Subscribe to event channel to act on events
-   * @param {*} channel
-   * @param {*} callback
-   * @memberof Storage
-   */
-  subscribe(
-    callback,
-    key = false,
-    channel = 'storage-update',
-    target = document.body
-  ) {
-    target.addEventListener(channel, (event) => {
-      callback(event.detail)
-    })
-  }
 }
+
+export default storage

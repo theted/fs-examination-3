@@ -3,39 +3,34 @@
  * and wrapping of sub-modules.
  */
 import './app-icons.js'
-import * as _ from './helpers.js'
-import Storage from './storage.js'
+import { setBackgroundImage, template } from './helpers.js'
+import storage from './storage.js'
 import Config from './config.js'
-const storage = new Storage()
 
-export default class AppWrap extends window.HTMLElement {
+export default class AppWrap extends HTMLElement {
   constructor() {
     super()
-    const template = document.createElement('template')
-    template.innerHTML = /* html */ `
-      <app-icons></app-icons>
-    `
 
     this.attachShadow({ mode: 'open' })
-    this.shadowRoot.appendChild(template.content.cloneNode(true))
+    this.shadowRoot.append(
+      template(/* html */ `<app-icons></app-icons>`).content
+    )
 
     this.init()
   }
 
   /**
-   * Actions to perform when application starts
+   * Apply the saved theme and background
    */
   init() {
-    // set theme
-    let theme = storage.get('setting-theme') || Config.defaults.theme
-    document.body.className = theme
-
-    // set background image
-    this.background =
-      storage.get('settings-background') || Config.defaults.background
-    _.setBackgroundImage(this.background, document.body)
+    document.body.className =
+      storage.get('setting-theme') || Config.defaults.theme
+    setBackgroundImage(
+      storage.get('settings-background') || Config.defaults.background,
+      document.body
+    )
   }
 }
 
 // register element
-window.customElements.define('app-wrap', AppWrap)
+customElements.define('app-wrap', AppWrap)

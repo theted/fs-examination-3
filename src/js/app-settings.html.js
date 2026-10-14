@@ -1,5 +1,6 @@
-const template = document.createElement('template')
-template.innerHTML = /* html */ `
+import { template } from './helpers.js'
+
+export default template(/* html */ `
 
   <header id="tabs">
     <a href="#themes">Themes</a>
@@ -19,6 +20,4 @@ template.innerHTML = /* html */ `
     <h3>Options</h3>
   </section>
 
-`
-
-export default template
+`)
