@@ -194,9 +194,7 @@ export default class ChatApp extends AppWindow {
       this.setUsername(prevUsername)
     } else {
       // add modal to document
-      let modal = document.body.appendChild(
-        document.createElement('app-modal')
-      )
+      let modal = document.body.appendChild(document.createElement('app-modal'))
       modal.setAttribute('content', 'Please provide an username for the chat')
       modal.setAttribute('placeholder', 'username')
 
