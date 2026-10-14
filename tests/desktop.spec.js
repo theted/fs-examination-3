@@ -76,3 +76,12 @@ test('a closed window stays closed after a reload', async ({ page }) => {
   await page.reload()
   await expect(page.locator('notes-app')).toHaveCount(0)
 })
+
+test('chat is hidden while there is no chat server', async ({ page }) => {
+  // a chat window left open from before must not come back either
+  await openDesktop(page, { 'chat-app': { x: 100, y: 100 } })
+
+  await expect(page.locator('app-icons #link-memory')).toBeVisible()
+  await expect(page.locator('app-icons #link-chat')).toHaveCount(0)
+  await expect(page.locator('chat-app')).toHaveCount(0)
+})
