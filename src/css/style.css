@@ -12,8 +12,6 @@ body {
   transition: background 400ms linear;
 }
 
-
-
 /**
  * Helper classes
  */
@@ -25,7 +23,6 @@ body {
   animation-duration: 400ms;
   animation-fill-mode: both;
 }
-
 
 /**
  * Animations - courtesy of https://github.com/daneden/animate.css
@@ -45,8 +42,6 @@ body {
   animation-name: fadeIn;
 }
 
-
-
 @keyframes zoomIn {
   from {
     opacity: 0;
@@ -61,8 +56,6 @@ body {
 .zoomIn {
   animation-name: zoomIn;
 }
-
-
 
 @keyframes zoomOut {
   from {
