@@ -1,8 +1,8 @@
 /**
  * Memory game module
- * TODO: support touch events
  */
 import AppWindow from './appwindow.js'
+import AppModal from './app-modal.js'
 import cssTemplate from './memory.css.js'
 import htmlTemplate from './memory.html.js'
 
@@ -25,6 +25,20 @@ export default class MemoryApp extends AppWindow {
     this._failsElement = this._contentElem.querySelector('#fails')
     this._accurracyElement = this._contentElem.querySelector('#accur')
 
+    // play with the keyboard: Enter or Space turns the focused tile
+    this._tilesElem.addEventListener('keydown', (event) => {
+      if (
+        (event.key === 'Enter' || event.key === ' ') &&
+        event.target.matches('img')
+      ) {
+        event.preventDefault()
+        this.clickTile(event.target)
+      }
+    })
+
+    // the window's own icon starts a new game
+    this._iconElem.addEventListener('click', () => this.newGame())
+
     // setup
     this.setTitle('Memory game')
     this.start()
@@ -34,26 +48,27 @@ export default class MemoryApp extends AppWindow {
    * Start / reset the Game
    */
   start() {
-    this.clicks = 0
+    this.attempts = 0
     this.failedAttempts = 0
     this.remaining = this.numTiles
     this.clickedElements = []
+    this.locked = false
     this.createTiles()
-    this._failsElement.textContent = 0
-    this._scoreElement.textContent = this.numTiles
-    this._accurracyElement.textContent = '0 %'
+    this.updateScore()
+  }
 
-    document.body.addEventListener('keyup', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        this.clickTile(this.shadowRoot.activeElement)
-      }
-    })
+  /**
+   * Show remaining pairs, failed guesses and accuracy
+   */
+  updateScore() {
+    const matches = this.attempts - this.failedAttempts
+    const accuracy = this.attempts
+      ? Math.round((matches / this.attempts) * 100)
+      : 0
 
-    // setup event listener for modal submit, handle update of username
-    document.body.addEventListener('click-icon', (event) => {
-      console.log('ICON!', event.detail.text)
-      this.newGame() // new game dialog
-    })
+    this._scoreElement.textContent = this.remaining
+    this._failsElement.textContent = this.failedAttempts
+    this._accurracyElement.textContent = accuracy + ' %'
   }
 
   /**
@@ -85,15 +100,19 @@ export default class MemoryApp extends AppWindow {
    * @param {Tile} Tile element
    */
   clickTile(el) {
-    // prevent same elemnt from being clicked twice
-    // TODO: fix double-click issue!
-    if (this.clicks === 1 && this.clickedElements[0] === el) return false
+    // ignore matched tiles, the tile that is already turned, and clicks
+    // while a wrong pair is still showing
+    if (this.locked || el.matched || this.clickedElements.includes(el)) {
+      return false
+    }
 
     this.clickedElements.push(el)
 
     el.src = this.imgPath + el.getAttribute('image-number') + '.png'
 
-    if (this.clicks % 2) {
+    if (this.clickedElements.length === 2) {
+      ++this.attempts
+
       if (this.matchTiles(this.clickedElements)) {
         this.sucessfulMatch(this.clickedElements)
       } else {
@@ -101,9 +120,8 @@ export default class MemoryApp extends AppWindow {
       }
 
       this.clickedElements = [] // reset clicked elements
+      this.updateScore()
     }
-
-    ++this.clicks
   }
 
   /**
@@ -123,6 +141,7 @@ export default class MemoryApp extends AppWindow {
    */
   sucessfulMatch(tiles) {
     tiles.forEach((tile) => {
+      tile.matched = true
       tile.classList.add('success')
       setTimeout(() => {
         this.removeTile(tile)
@@ -130,7 +149,6 @@ export default class MemoryApp extends AppWindow {
     })
 
     --this.remaining
-    this._scoreElement.textContent = this.remaining
 
     if (this.remaining === 0) {
       this.gameCompleted()
@@ -142,22 +160,14 @@ export default class MemoryApp extends AppWindow {
    * @param {Tiles[]} tiles
    */
   failureMatch(tiles) {
-    tiles.forEach((tile) => {
-      this._setClassAndReset(tile, 'failure')
-    })
     ++this.failedAttempts
-    this._failsElement.textContent = this.failedAttempts
-  }
 
-  /**
-   * Set tile class name & reset tile after timeout
-   * @param {Tile} tile
-   * @param {string} className
-   */
-  _setClassAndReset(tile, className) {
-    tile.classList.add(className)
+    // show the wrong pair for a moment before turning it back
+    this.locked = true
+    tiles.forEach((tile) => tile.classList.add('failure'))
     setTimeout(() => {
-      this.resetTile(tile)
+      tiles.forEach((tile) => this.resetTile(tile))
+      this.locked = false
     }, this.timeout)
   }
 
@@ -167,7 +177,6 @@ export default class MemoryApp extends AppWindow {
    */
   removeTile(tile) {
     tile.src = '/image/pixel.png'
-    tile.removeEventListener('click', this.clickTile, false)
     tile.setAttribute('tabindex', -1)
   }
 
@@ -213,19 +222,21 @@ export default class MemoryApp extends AppWindow {
    * Start new game, allowing the user to choose number of tiles
    * through a modal window.
    */
-  newGame() {
-    let modal = document.body.appendChild(document.createElement('app-modal'))
-    modal.setAttribute('content', 'Rounds')
-    modal.setAttribute('placeholder', 'rounds')
-    modal.setAttribute('value', 8)
-    modal.setAttribute('max', 8)
-    modal.setAttribute('type', 'number')
-
-    // setup listener for modal
-    document.body.addEventListener('modal-update', (event) => {
-      this.numTiles = event.detail.text
-      this.start()
+  async newGame() {
+    const rounds = await AppModal.prompt({
+      content: 'Rounds',
+      placeholder: 'rounds',
+      value: this.numTiles,
+      type: 'number',
+      min: 1,
+      max: this.maxTiles
     })
+
+    const numTiles = parseInt(rounds, 10)
+    if (!(numTiles >= 1)) return // dismissed, or not a number
+
+    this.numTiles = Math.min(numTiles, this.maxTiles)
+    this.start()
   }
 }
 

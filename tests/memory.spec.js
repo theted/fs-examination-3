@@ -73,3 +73,86 @@ test('the game can be played with the keyboard', async ({ page }) => {
 
   await expect(tile).not.toHaveAttribute('src', /\/0\.png$/)
 })
+
+test('the turned tile and matched tiles ignore clicks', async ({ page }) => {
+  const tiles = page.locator('memory-app .tiles img')
+  const [[a, b], [c]] = await pairs(page)
+
+  await tiles.nth(a).click()
+  await tiles.nth(a).click() // same tile again: not a guess
+  await tiles.nth(b).click()
+  await expect(page.locator('memory-app #score')).toHaveText('7')
+
+  await tiles.nth(a).click() // matched tile: ignored
+  await tiles.nth(c).click()
+  await expect(tiles.nth(c)).not.toHaveAttribute('src', /\/0\.png$/)
+  await expect(page.locator('memory-app #fails')).toHaveText('0')
+})
+
+test('tiles are locked while a wrong pair is showing', async ({ page }) => {
+  const tiles = page.locator('memory-app .tiles img')
+  const [[a], [b], [c]] = await pairs(page)
+
+  await tiles.nth(a).click()
+  await tiles.nth(b).click()
+  await tiles.nth(c).click() // too early
+
+  await expect(tiles.nth(c)).toHaveAttribute('src', /\/0\.png$/)
+  await expect(tiles.nth(a)).toHaveAttribute('src', /\/0\.png$/) // flipped back
+  await tiles.nth(c).click()
+  await expect(tiles.nth(c)).not.toHaveAttribute('src', /\/0\.png$/)
+})
+
+test('accuracy is updated', async ({ page }) => {
+  const tiles = page.locator('memory-app .tiles img')
+  const [[a, b], [c], [d]] = await pairs(page)
+
+  await tiles.nth(a).click()
+  await tiles.nth(b).click()
+  await expect(page.locator('memory-app #accur')).toHaveText('100 %')
+
+  await tiles.nth(c).click()
+  await tiles.nth(d).click()
+  await expect(page.locator('memory-app #accur')).toHaveText('50 %')
+})
+
+test('the window icon starts a new game with the chosen number of pairs', async ({
+  page
+}) => {
+  await page.locator('memory-app .icon app-icon').click()
+
+  const input = page.locator('app-modal input')
+  await expect(input).toBeFocused()
+  await input.fill('4')
+  await input.press('Enter')
+
+  await expect(page.locator('app-modal')).toHaveCount(0)
+  await expect(page.locator('memory-app .tiles img')).toHaveCount(8)
+  await expect(page.locator('memory-app #score')).toHaveText('4')
+})
+
+test('the new-game dialog can be dismissed', async ({ page }) => {
+  await page.locator('memory-app .icon app-icon').click()
+  await page.locator('app-modal input').press('Escape')
+
+  await expect(page.locator('app-modal')).toHaveCount(0)
+  await expect(page.locator('memory-app .tiles img')).toHaveCount(16)
+})
+
+test('other windows do not trigger the memory game', async ({ page }) => {
+  const errors = trackErrors(page)
+  await openDesktop(page, {
+    'memory-app': { x: 40, y: 40 },
+    'notes-app': { x: 700, y: 40 }
+  })
+
+  // Enter in another window used to throw in every memory game
+  await page.locator('notes-app button[name="new"]').click()
+  await page.locator('notes-app input[name="title"]').press('Enter')
+
+  // closing another window used to open the new-game dialog
+  await page.locator('notes-app .close app-icon').click()
+  await expect(page.locator('notes-app')).toHaveCount(0)
+  await expect(page.locator('app-modal')).toHaveCount(0)
+  expect(errors).toEqual([])
+})
