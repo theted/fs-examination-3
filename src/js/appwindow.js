@@ -38,25 +38,11 @@ export default class AppWindow extends window.HTMLElement {
     )
     this._appIcon = this.shadowRoot.querySelector('app-icon')
 
-    // set initial window dimensions
-    this.style.minWidth = this.width + 'px'
-    this.style.minHeight = this.height + 'px'
-
-    // set initial position
-    if (!this.style.top || !this.style.left) this.setStartPosition()
-
-    // add start animation
-    this.classList.add('zoomIn')
-
     // bind event listeners
     this.addEventListener('mousedown', this._focus)
     this.addEventListener('blur', this._blur)
 
     this._closeElem.addEventListener('click', () => this.destroy())
-
-    this._setupDragEvents()
-    this._focus() // set initial focus
-    this.savePosition() // save initial position
   }
 
   /**
@@ -239,9 +225,29 @@ export default class AppWindow extends window.HTMLElement {
   }
 
   /**
-   * Actions performed when element is created
+   * Actions performed when element is added to the DOM.
+   * Custom elements (v1) must not gain attributes in their constructor, so
+   * everything touching the host's style, class or attributes happens here.
    */
   connectedCallback() {
+    // only set up once, even if the element is moved around in the DOM
+    if (this._initialized) return
+    this._initialized = true
+
+    // set initial window dimensions
+    this.style.minWidth = this.width + 'px'
+    this.style.minHeight = this.height + 'px'
+
+    // set initial position
+    if (!this.style.top || !this.style.left) this.setStartPosition()
+
+    // add start animation
+    this.classList.add('zoomIn')
+
+    this._setupDragEvents()
+    this._focus() // set initial focus
+    this.savePosition() // save initial position
+
     console.log('Creating new window')
     this.addEventListener('mousedown', (e) => console.log(' -> mousedown'))
     this.addEventListener('mouseup', (e) => console.log(' -> mouseup'))
