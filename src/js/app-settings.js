@@ -9,7 +9,6 @@ const storage = new Storage()
 export default class SettingsApp extends AppWindow {
   constructor() {
     super()
-    const _this = this
 
     this.imgPath = '/image/backgrounds/'
 

@@ -214,9 +214,7 @@ export default class MemoryApp extends AppWindow {
    * through a modal window.
    */
   newGame() {
-    let modal = document.body.appendChild(
-      document.createElement('app-modal')
-    )
+    let modal = document.body.appendChild(document.createElement('app-modal'))
     modal.setAttribute('content', 'Rounds')
     modal.setAttribute('placeholder', 'rounds')
     modal.setAttribute('value', 8)

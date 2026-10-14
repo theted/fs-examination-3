@@ -85,7 +85,6 @@ export default class NotesApp extends AppWindow {
 
   showNote(title = false, content = false, name = false) {
     if (!title) title = 'New note'
-    if (!name) name = _.safify(title)
 
     this._noteTitle.value = title
     this._note.value = content
