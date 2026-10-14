@@ -86,10 +86,10 @@ export default class AppIcons extends window.HTMLElement {
     if (!x || !y) {
       ;[x, y] = this.getNextPosition(app + '-app')
     }
-    let el = document.body.appendChild(
-      document.createElement(app + '-app', false)
-    )
+    // position the window before it is connected, so it does not start centered
+    let el = document.createElement(app + '-app')
     this.setEl(el, x, y)
+    document.body.appendChild(el)
   }
 
   /**

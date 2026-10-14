@@ -178,7 +178,7 @@ template.innerHTML = /* html */ `
      * Focus state
      */
 
-    :host-context(.focused) {
+    :host(.focused) {
       filter: drop-shadow(2px 5px 20px rgba(0,0,0,0.75));
       z-index: 100;
     }

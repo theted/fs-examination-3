@@ -195,7 +195,7 @@ export default class ChatApp extends AppWindow {
     } else {
       // add modal to document
       let modal = document.body.appendChild(
-        document.createElement('app-modal', false)
+        document.createElement('app-modal')
       )
       modal.setAttribute('content', 'Please provide an username for the chat')
       modal.setAttribute('placeholder', 'username')
@@ -208,10 +208,12 @@ export default class ChatApp extends AppWindow {
   }
 
   connectedCallback() {
+    super.connectedCallback()
     console.log('Hi fom chat')
   }
 
   disconnectedCallback() {
+    super.disconnectedCallback()
     this.connection.close()
     console.log('Bye from chat')
   }
