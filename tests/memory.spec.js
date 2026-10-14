@@ -59,9 +59,14 @@ test('matching every pair completes the game', async ({ page }) => {
   }
 
   await expect(page.locator('memory-app .tiles h1')).toHaveText(
-    'GAME COMPLETED!'
+    'All pairs found'
   )
-  await page.locator('memory-app .tiles button').click()
+  await expect(page.locator('memory-app .tiles p')).toHaveText(
+    '8 pairs in 8 guesses'
+  )
+  await page
+    .locator('memory-app .tiles button', { hasText: 'Play again' })
+    .click()
   await expect(tiles).toHaveCount(16)
   expect(errors).toEqual([])
 })

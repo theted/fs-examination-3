@@ -77,6 +77,17 @@ test('a closed window stays closed after a reload', async ({ page }) => {
   await expect(page.locator('notes-app')).toHaveCount(0)
 })
 
+test('the dock marks apps with open windows', async ({ page }) => {
+  await openDesktop(page, { 'notes-app': { x: 100, y: 100 } })
+  const notesLink = page.locator('app-icons #link-notes')
+  const memoryLink = page.locator('app-icons #link-memory')
+  await expect(notesLink).toHaveAttribute('data-open')
+  await expect(memoryLink).not.toHaveAttribute('data-open')
+
+  await page.locator('notes-app .close').click()
+  await expect(notesLink).not.toHaveAttribute('data-open')
+})
+
 test('chat is hidden while there is no chat server', async ({ page }) => {
   // a chat window left open from before must not come back either
   await openDesktop(page, { 'chat-app': { x: 100, y: 100 } })

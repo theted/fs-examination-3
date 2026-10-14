@@ -48,6 +48,27 @@ test('a fast drag keeps hold of the window', async ({ page }) => {
   })
 })
 
+test('a held window lights up where it is gripped', async ({ page }) => {
+  const notes = page.locator('notes-app')
+  const from = await center(notes.locator('.title'))
+  const box = await notes.boundingBox()
+
+  await page.mouse.move(from.x, from.y)
+  await page.mouse.down()
+  await expect(notes).toHaveClass(/held/)
+  const grip = await notes.evaluate((el) => [
+    el.style.getPropertyValue('--grip-x'),
+    el.style.getPropertyValue('--grip-y')
+  ])
+  expect(grip).toEqual([
+    `${Math.round(from.x - box.x)}px`,
+    `${Math.round(from.y - box.y)}px`
+  ])
+
+  await page.mouse.up()
+  await expect(notes).not.toHaveClass(/held/)
+})
+
 test('dragging window content does not move the window', async ({ page }) => {
   const memory = page.locator('memory-app')
   const before = await windowState(memory)
