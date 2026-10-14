@@ -3,7 +3,7 @@
  * TODO: persist (some!) latest messages in localStorage
  */
 import AppWindow from './appwindow.js'
-import AppModal from './app-modal.js'
+import './app-modal.js'
 import Storage from './storage.js'
 import Config from './config.js'
 import * as _ from './helpers.js'
@@ -89,14 +89,14 @@ export default class ChatApp extends AppWindow {
    */
   displayMessage(message, user, time) {
     let msg = _.addTo(this._messages, 'p', false, 'message')
-    let msgUser = _.addTo(msg, 'span', user, 'user')
+    _.addTo(msg, 'span', user, 'user')
 
     message = this.sanitize(message)
     message = message.split('\n').join('<br>')
 
     let msgMsg = _.addTo(msg, 'span', message, 'text')
     msgMsg.innerHTML = message
-    let msgTime = _.addTo(msg, 'span', time, 'time')
+    _.addTo(msg, 'span', time, 'time')
     this._messages.scrollTop = this._messages.scrollHeight // scroll to bottom of chat window
     return msg
   }

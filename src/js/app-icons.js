@@ -72,7 +72,7 @@ export default class AppIcons extends window.HTMLElement {
     if (prevElems.length) {
       prevElems[0].destroy()
     } else {
-      this.createApp(link + '-app', x, y)
+      this.createApp(link)
     }
   }
 
