@@ -11,7 +11,7 @@ import cssTemplate from './app-modal.css.js'
  *   <app-modal title="Hello, World!" content="Modal content"></app-modal>
  *
  *   // in JS
- *   let modal = document.body.appendChild(document.createElement('app-modal', false))
+ *   let modal = document.body.appendChild(document.createElement('app-modal'))
  *   modal.setAttribute('title', 'Dynamic modal title')
  *
  *   // an `modal-update` event is fired when the modal is closed, bind to it like this:
