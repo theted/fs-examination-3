@@ -122,9 +122,27 @@ export default class AppWindow extends window.HTMLElement {
   _dragUpdate(e) {
     if (e.pointerId !== this._dragPointer) return
 
-    this.x = Math.round(e.clientX - this._dragOffsetX)
-    this.y = Math.round(e.clientY - this._dragOffsetY)
+    ;[this.x, this.y] = this._keepInView(
+      Math.round(e.clientX - this._dragOffsetX),
+      Math.round(e.clientY - this._dragOffsetY)
+    )
     this.placeElem(this.x, this.y, this)
+  }
+
+  /**
+   * Limit a window position so part of the title bar stays on screen and the
+   * window can always be grabbed again (e.g. a position saved on a bigger screen)
+   * @param {number} x
+   * @param {number} y
+   * @returns {number[]} [x, y]
+   */
+  _keepInView(x, y) {
+    const visible = 140 // px of the window kept on screen horizontally
+    const minX = visible - this.offsetWidth
+    const maxX = window.innerWidth - visible
+    const maxY = window.innerHeight - 40
+
+    return [Math.max(minX, Math.min(x, maxX)), Math.max(0, Math.min(y, maxY))]
   }
 
   /**
@@ -228,6 +246,14 @@ export default class AppWindow extends window.HTMLElement {
 
     // set initial position
     if (!this.style.top || !this.style.left) this.setStartPosition()
+
+    // pull restored windows back on screen if needed
+    const [x, y] = this._keepInView(this.offsetLeft, this.offsetTop)
+    if (x !== this.offsetLeft || y !== this.offsetTop) {
+      this.x = x
+      this.y = y
+      this.placeElem(x, y, this)
+    }
 
     // add start animation
     this.classList.add('zoomIn')

@@ -53,7 +53,7 @@ export default class SettingsApp extends AppWindow {
     })
 
     // start at backgrounds tabs
-    this._tabsLinks[2].click()
+    this.shadowRoot.querySelector('#tabs a[href="#backgrounds"]').click()
   }
 
   /**
@@ -88,7 +88,8 @@ export default class SettingsApp extends AppWindow {
     let elements = this._contentElem.getElementsByTagName('img')
     for (let i = 0, len = elements.length; i < len; i++) {
       elements[i].addEventListener('click', (event) => {
-        this.setBackgroundImage(event.target.src, document.body)
+        // store the path, not the absolute URL, so it survives a new host
+        this.setBackgroundImage(event.target.getAttribute('src'))
       })
     }
   }
@@ -98,12 +99,13 @@ export default class SettingsApp extends AppWindow {
    */
   setupOptions() {
     for (let option in Config.availableOptions) {
-      // TODO: use template?
-      // TODO: set initial checked state based on existing config
+      let checked = storage.get('settings-' + option) === 'true'
 
       let templateHtml = /* html */ `
-        <input type="checkbox" name="${option}">
-        <label for="${option}">${Config.availableOptions[option]}</label>
+        <label>
+          <input type="checkbox" name="${option}" ${checked ? 'checked' : ''}>
+          ${Config.availableOptions[option]}
+        </label>
         <br>
       `
 

@@ -52,13 +52,18 @@ export default class AppIcons extends window.HTMLElement {
     // listen and change on storage events ....
     storage.subscribe((data) => {
       if (data.key === 'settings-autoHide') {
-        this.style.opacity = data.value ? 0 : 1
-      }
-
-      if (data.key === 'settings-spec' && data.value) {
-        console.log('Test active!')
+        this.classList.toggle('auto-hide', data.value)
       }
     })
+  }
+
+  connectedCallback() {
+    // apply the saved auto-hide setting (not in the constructor: custom
+    // elements must not gain attributes there)
+    this.classList.toggle(
+      'auto-hide',
+      storage.get('settings-autoHide') === 'true'
+    )
   }
 
   /**

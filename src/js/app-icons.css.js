@@ -7,6 +7,17 @@ template.innerHTML = /* html */ `
       bottom: 0px;
       left: 0px;
       right: 0px;
+      transition: opacity 300ms;
+    }
+
+    /* auto-hide: invisible until hovered (or focused with the keyboard) */
+    :host(.auto-hide) {
+      opacity: 0;
+    }
+
+    :host(.auto-hide:hover),
+    :host(.auto-hide:focus-within) {
+      opacity: 1;
     }
 
     :host ul {

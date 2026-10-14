@@ -74,3 +74,21 @@ test('clicking a window raises it above the others', async ({ page }) => {
   await expect(memory).toHaveClass(/focused/)
   await expect(notes).not.toHaveClass(/focused/)
 })
+
+test('a window cannot be dragged above the top edge', async ({ page }) => {
+  const notes = page.locator('notes-app')
+  const from = await center(notes.locator('.title'))
+
+  await mouseDrag(page, from, { x: from.x, y: 0 })
+
+  expect((await windowState(notes)).y).toBe(0)
+})
+
+test('a window saved off screen is pulled back into view', async ({ page }) => {
+  await openDesktop(page, { 'notes-app': { x: 5000, y: 5000 } })
+
+  const { x, y } = await windowState(page.locator('notes-app'))
+  const viewport = page.viewportSize()
+  expect(x).toBeLessThanOrEqual(viewport.width - 140)
+  expect(y).toBeLessThanOrEqual(viewport.height - 40)
+})

@@ -41,3 +41,23 @@ test('picking a theme restyles the windows and is remembered', async ({
     'rgb(35, 35, 35)'
   )
 })
+
+test('auto-hide is remembered and the dock shows on hover', async ({
+  page
+}) => {
+  const settings = page.locator('settings-app')
+  const dock = page.locator('app-icons')
+  await settings.locator('#tabs a', { hasText: 'Options' }).click()
+  await settings.locator('input[name="autoHide"]').check()
+  await expect(dock).toHaveCSS('opacity', '0')
+
+  await page.reload()
+  await expect(dock).toHaveCSS('opacity', '0')
+  await page.locator('settings-app #tabs a', { hasText: 'Options' }).click()
+  await expect(
+    page.locator('settings-app input[name="autoHide"]')
+  ).toBeChecked()
+
+  await dock.hover()
+  await expect(dock).toHaveCSS('opacity', '1')
+})
