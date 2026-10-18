@@ -1,0 +1,51 @@
+# Lint and run the e2e tests on every pull request and push; pushes to master
+# then deploy to pwd.sundbergsolutions.se (S3 + CloudFront) through the shared
+# workflow in theted/workflows. See static-s3.md in theted/infrastructure.
+name: Test and deploy
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npx prettier --check .
+
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: End-to-end tests
+        run: npm test
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    uses: theted/workflows/.github/workflows/deploy-static.yml@master
+    with:
+      node-version: '24'
+      build-command: npm run build
+      dist-dir: dist
+    secrets: inherit
